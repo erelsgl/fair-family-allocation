@@ -235,7 +235,7 @@ def allocate(family1: BinaryFamily, family2: BinaryFamily, goods: set):
         family2.take_good(g)
         remaining_goods.remove(g)
 
-    allocate.trace("Final allocation: family 1 gets {}, family 2 gets {}".format(
+    allocate.trace("\nFinal allocation: family 1 gets {}, family 2 gets {}".format(
     family1.allocated_goods, family2.allocated_goods))
 
 allocate.trace = lambda *x: None  # To enable tracing, set allocate.trace=True
