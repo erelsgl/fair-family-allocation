@@ -6,4 +6,4 @@ just run:
 
     python3 rwav-demo.py
 
-You can edit the file to change the example.
+You can edit the file rwav-demo.py to change the example.
