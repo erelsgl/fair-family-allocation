@@ -6,40 +6,8 @@ Implementation of the RWAV protocol - Round-Robin with Approval Voting.
 See: https://arxiv.org/abs/1709.02564 for details.
 """
 
-import numpy as np, math
 from functools import lru_cache
 from collections import defaultdict
-
-
-@lru_cache(maxsize=None)
-def binom(n:int, k:int)->int:
-    """
-    A fast way to calculate binomial coefficients by Andrew Dalke.
-    See http://stackoverflow.com/questions/3025162/statistics-combinations-in-python
-
-    NOTE: scipy.special.binom returns a float64 rather than an int.
-
-    >>> binom(0,5)
-    0
-    >>> binom(5,0)
-    1
-    >>> binom(5,3)
-    10
-    >>> binom(5,5)
-    1
-    >>> binom(5,6)
-    0
-    """
-    if 0 <= k <= n:
-        ntok = 1
-        ktok = 1
-        for t in range(1, min(k, n - k) + 1):
-            ntok *= n
-            ktok *= t
-            n -= 1
-        return ntok // ktok
-    else:
-        return 0
 
 @lru_cache(maxsize=None)
 def balance(r:int, s:int)->float:
@@ -95,6 +63,11 @@ def weight(r:int, s:int)->float:
 class BinaryAgent:
     """
     Represents an agent with binary valuations, or several agents with the same binary valuations.
+
+    >>> BinaryAgent({"x","y","z"})
+    1 agents who want ['x', 'y', 'z']
+    >>> BinaryAgent({"x","y","z"}, 2)
+    2 agents who want ['x', 'y', 'z']
     """
 
     def __init__(self, desired_goods:set, cardinality:int=1):
