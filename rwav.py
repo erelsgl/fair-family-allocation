@@ -37,11 +37,11 @@ def balance(r:int, s:int)->float:
     val2 = balance(r-2,s-1)
     return min(val1,val2)
 
+@lru_cache(maxsize=None)
 def weight(r:int, s:int)->float:
     """
-    Calculates the function B(r,s), which represents
+    Calculates the function w(r,s), which represents
        the voting weight of a user with r remaining goods and s missing goods.
-    Uses the recurrence relation in https://arxiv.org/abs/1709.02564 .
 
     >>> float(weight(4,0))
     0.0
