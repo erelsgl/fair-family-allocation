@@ -14,6 +14,7 @@ if __name__ == "__main__":
 
     # Define fairness criteria:
     fairness_1_of_best_2 = fairness_criteria.one_of_best_c(2)
+    rwav.allocate_enhanced.trace = print
 
     # Define families:
     family1 = BinaryFamily([
@@ -29,24 +30,15 @@ if __name__ == "__main__":
     family2.trace = print
     print("Group 2 has:\n{}".format(family2))
 
+
     # Run the protocol:
     rwav.allocate.trace = print
     print("\nRWAV protocol - group 1 plays first:")
-    [bundle1,bundle2] = rwav.allocate([family1, family2], "vwxyz")
-    print("Final allocation:\n * Group 1: {}\n * Group 2: {}".format(
-    family1.allocation_description(bundle1),
-    family2.allocation_description(bundle2)))
+    rwav.demo(rwav.allocate, [family1, family2], "vwxyz")
 
-    rwav.allocate.trace = print
     print("\nRWAV protocol - group 1 and group 2 exchange roles:")
-    [bundle2, bundle1] = rwav.allocate([family2, family1], "vwxyz")
-    print("Final allocation:\n * Group 1: {}\n * Group 2: {}".format(
-    family1.allocation_description(bundle1),
-    family2.allocation_description(bundle2)))
+    rwav.demo(rwav.allocate, [family2, family1], "vwxyz")
 
-    rwav.allocate_enhanced.trace = print
-    print("\nEnhanced RWAV protocol with threshold 0.6:")
-    [bundle2, bundle1] = rwav.allocate_enhanced([family2, family1], "vwxyz", threshold=0.6)
-    print("Final allocation:\n * Group 1: {}\n * Group 2: {}".format(
-    family1.allocation_description(bundle1),
-    family2.allocation_description(bundle2)))
+    threshold=0.6
+    print("\nEnhanced RWAV protocol with threshold {}:".format(threshold))
+    rwav.demo(rwav.allocate_enhanced, [family2, family1], "vwxyz", threshold)

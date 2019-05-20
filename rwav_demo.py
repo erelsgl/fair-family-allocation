@@ -16,6 +16,7 @@ if __name__ == "__main__":
     # define fairness criteria:
     fairness_1_of_2_mms  = fairness_criteria.maximin_share_one_of_c(2)
     fairness_1_of_best_2 = fairness_criteria.one_of_best_c(2)
+    rwav.allocate.trace = print
 
     # Define families:
     family1 = BinaryFamily([
@@ -32,17 +33,9 @@ if __name__ == "__main__":
     print("Group 2 has:\n{}".format(family2))
 
     # Run the protocol:
-    rwav.allocate.trace = print
-
     print("\n\nRWAV protocol - group 1 plays first")
-    [bundle1,bundle2] = rwav.allocate([family1, family2], "wxyz")
-    print("Final allocation:\n * Group 1: {}\n * Group 2: {}".format(
-    family1.allocation_description(bundle1),
-    family2.allocation_description(bundle2)))
+    rwav.demo(rwav.allocate, [family1, family2], "wxyz")
 
     print("\n\nRWAV protocol - group 2 plays first")
-    [bundle1, bundle2] = rwav.allocate([family2, family1], "wxyz")
-    print("Final allocation:\n * Group 1: {}\n * Group 2: {}".format(
-    family1.allocation_description(bundle1),
-    family2.allocation_description(bundle2)))
+    rwav.demo(rwav.allocate, [family2, family1], "wxyz")
 

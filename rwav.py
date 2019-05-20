@@ -263,6 +263,23 @@ def allocate_twothirds(families:list, goods: set):
 allocate_twothirds.trace = lambda *x: None  # To enable tracing, set allocate_twothirds.trace=print
 
 
+def demo(algorithm, families, goods, *args):
+    """
+    Demonstrate the given algorithm on the given families (must be 2 families).
+    :param algorithm:
+    :param families:
+    :param goods:
+    :param args:
+    :return:
+    """
+    if len(families)!=2:
+        raise("Currently only 2 families are supported")
+    bundles = algorithm(families, goods, *args)
+    print("Final allocation:\n * Group 1: {}\n * Group 2: {}".format(
+    families[0].allocation_description(bundles[0]),
+    families[1].allocation_description(bundles[1])))
+
+
 @lru_cache(maxsize=None)
 def balance(r:int, s:int)->float:
     """
