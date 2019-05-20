@@ -17,25 +17,25 @@ if __name__ == "__main__":
     fairness_1_of_2_mms  = fairness_criteria.maximin_share_one_of_c(2)
     fairness_1_of_best_2 = fairness_criteria.one_of_best_c(2)
     rwav.allocate.trace = print
+    rwav.choose_good.trace = print
+    rwav.member_weight.trace = print
 
     # Define families:
     family1 = BinaryFamily([
-        BinaryAgent("wx",2),
-        BinaryAgent("xy",1),
-        BinaryAgent("yz",5),
-        BinaryAgent("zw",3)], fairness_1_of_best_2)
-    family1.trace = print
-    print("Group 1 has:\n{}".format(family1))
+        BinaryAgent("vx",2),
+        BinaryAgent("vxy",1),
+        BinaryAgent("wxyz",5),
+        BinaryAgent("zw",3)], fairness_1_of_2_mms, name="Group 1")
+    print("{} has:\n{}".format(family1.name, family1))
     family2 = BinaryFamily([
-        BinaryAgent("wz",2),
-        BinaryAgent("zy",3)], fairness_1_of_2_mms)
-    family2.trace = print
-    print("Group 2 has:\n{}".format(family2))
+        BinaryAgent("wxyz",2),
+        BinaryAgent("vz",3)], fairness_1_of_2_mms, name="Group 2")
+    print("{} has:\n{}".format(family2.name, family2))
 
     # Run the protocol:
-    print("\n\nRWAV protocol - group 1 plays first")
+    print("\n\nRWAV protocol - {} plays first".format(family1.name))
     rwav.demo(rwav.allocate, [family1, family2], "wxyz")
 
-    print("\n\nRWAV protocol - group 2 plays first")
+    print("\n\nRWAV protocol - {} plays first".format(family2.name))
     rwav.demo(rwav.allocate, [family2, family1], "wxyz")
 
