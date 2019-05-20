@@ -6,16 +6,17 @@ Demonstration of the two-thirds protocol.
 See: https://arxiv.org/abs/1709.02564 for details.
 """
 
-import rwav, fairness_criteria
+import binary_families, fairness_criteria
 from agents import BinaryAgent
-from rwav import BinaryFamily
+from binary_families import *
 import copy
+
 
 def demo(family:BinaryFamily, goods:set):
     family1 = copy.copy(family); family1.name="Group 1"
     family2 = copy.copy(family); family2.name="Group 2"
     print("\n\nThere are two identical groups with:\n{}".format(family))
-    rwav.demo(rwav.allocate_twothirds, [family1, family2], goods)
+    binary_families.demo(allocate_twothirds, [family1, family2], goods)
 
 
 
@@ -23,7 +24,7 @@ if __name__ == "__main__":
 
     # Define fairness criteria:
     fairness_1_of_best_2 = fairness_criteria.one_of_best_c(2)
-    rwav.allocate_twothirds.trace = print
+    binary_families.allocate_twothirds.trace = print
     goods = "vwxyz"
 
     family1 = BinaryFamily([
@@ -54,11 +55,11 @@ if __name__ == "__main__":
     #     [BinaryAgent(goods, 1) for goods in ["tu","tv","uv",  "tz",  "xy","xz","yz"]],
     #     fairness_1_of_best_2)
     # demo(family5, "tuvxyz")
-    # rwav.demo(rwav.allocate_enhanced, [family5,family5], "tuvxyz", 0.6)
+    # binary_families.demo(binary_families.allocate_using_enhanced_RWAV, [family5,family5], "tuvxyz", 0.6)
     #
     # family6 = BinaryFamily(
     #     [BinaryAgent(goods, 1) for goods in ["vw","vx","vy","vz","vx","vy","wz","xy","xz","yz"]],
     #     fairness_1_of_best_2)
     # demo(family6, "zyxwv")
-    # rwav.demo(rwav.allocate, [family6,family6], "zyxwv")
-    # rwav.demo(rwav.allocate_enhanced, [family6,family6], "zyxwv", 0.6)
+    # binary_families.demo(binary_families.allocate_using_RWAV, [family6,family6], "zyxwv")
+    # binary_families.demo(binary_families.allocate_using_enhanced_RWAV, [family6,family6], "zyxwv", 0.6)

@@ -74,22 +74,21 @@ class BinaryFamily:
         return "Allocated bundle = {}, happy members = {}/{}".format(
             bundle, self.num_of_happy_members(bundle), self.num_of_members())
 
-
-
     def __repr__(self):
         return "\n".join([" * "+member.__repr__() for (member,target_value) in self.members])
 
 
-def allocate(families:list, goods: set)->list:
+
+def allocate_using_RWAV(families:list, goods: set)->list:
     """
-    Run the RWAV protocol on the given families.
+    Run the RWAV protocol (Round Robin with Weighted Voting) on the given families.
     Currently only 2 families are supported.
     Return a list of bundles - a bundle per family.
 
     >>> fairness_1_of_best_2 = fairness_criteria.one_of_best_c(2)
     >>> family1 = BinaryFamily([BinaryAgent({"w","x"},1),BinaryAgent({"x","y"},2),BinaryAgent({"y","z"},3), BinaryAgent({"z","w"},4)], fairness_1_of_best_2)
     >>> family2 = BinaryFamily([BinaryAgent({"w","z"},2),BinaryAgent({"z","y"},3)], fairness_1_of_best_2)
-    >>> (bundle1,bundle2) = allocate([family1, family2], ["w","x","y","z"])
+    >>> (bundle1,bundle2) = allocate_using_RWAV([family1, family2], ["w","x","y","z"])
     >>> sorted(bundle1)
     ['x', 'z']
     >>> sorted(bundle2)
@@ -106,15 +105,15 @@ def allocate(families:list, goods: set)->list:
     while len(remaining_goods) > 0:
         current_family = families[family_index]
         current_family_bundle = bundles[family_index]
-        allocate.trace("\nTurn #{}: {}'s turn to pick a good from {}:".format(turn_index+1, current_family.name, sorted(remaining_goods)))
+        allocate_using_RWAV.trace("\nTurn #{}: {}'s turn to pick a good from {}:".format(turn_index + 1, current_family.name, sorted(remaining_goods)))
         g = choose_good(current_family, current_family_bundle, remaining_goods)
-        allocate.trace("{} picks {}".format(current_family.name, g))
+        allocate_using_RWAV.trace("{} picks {}".format(current_family.name, g))
         current_family_bundle.add(g)
         remaining_goods.remove(g)
         turn_index += 1
         family_index = (family_index + 1) % n_families
     return bundles
-allocate.trace = lambda *x: None  # To enable tracing, set allocate.trace=print
+allocate_using_RWAV.trace = lambda *x: None  # To enable tracing, set allocate_using_RWAV.trace=print
 
 
 
@@ -175,7 +174,7 @@ member_weight.trace = lambda *x: None  # To enable tracing, set member_weight.tr
 
 
 
-def allocate_enhanced(families:list, goods: set, threshold: float):
+def allocate_using_enhanced_RWAV(families:list, goods: set, threshold: float):
     """
     Run the Enhanced RWAV protocol (see Section 3 in the paper) on the given families.
     Currently only 2 families are supported.
@@ -187,12 +186,12 @@ def allocate_enhanced(families:list, goods: set, threshold: float):
     >>> fairness_1_of_best_2 = fairness_criteria.one_of_best_c(2)
     >>> family1 = BinaryFamily([BinaryAgent({"w","x"},1),BinaryAgent({"x","y"},3),BinaryAgent({"y","z"},3), BinaryAgent({"w","v"},3)], fairness_1_of_best_2)
     >>> family2 = BinaryFamily([BinaryAgent({"w","x"},5),BinaryAgent({"y","z"},5)], fairness_1_of_best_2)
-    >>> (bundle1,bundle2) = allocate_enhanced([family1, family2], ["v","w","x","y","z"], threshold=0.6)
+    >>> (bundle1,bundle2) = allocate_using_enhanced_RWAV([family1, family2], ["v","w","x","y","z"], threshold=0.6)
     >>> sorted(bundle1)
     ['y']
     >>> sorted(bundle2)
     ['v', 'w', 'x', 'z']
-    >>> (bundle2,bundle1) = allocate_enhanced([family2, family1], ["v","w","x","y","z"], threshold=0.6)
+    >>> (bundle2,bundle1) = allocate_using_enhanced_RWAV([family2, family1], ["v","w","x","y","z"], threshold=0.6)
     >>> sorted(bundle1)
     ['y']
     >>> sorted(bundle2)
@@ -210,17 +209,17 @@ def allocate_enhanced(families:list, goods: set, threshold: float):
         if nums[0] >= thresholds[0]:
             bundle1 = set(g)
             bundle2 = goods.difference(bundle1)
-            allocate_enhanced.trace("{} out of {} members in {} want {}, so group 1 gets {} and group 2 gets the rest".format(
+            allocate_using_enhanced_RWAV.trace("{} out of {} members in {} want {}, so group 1 gets {} and group 2 gets the rest".format(
                 nums[0],     families[0].num_of_members(),     families[0].name, g,                  g))
             return (bundle1,bundle2)
         elif nums[1] >= thresholds[1]:
             bundle2 = set(g)
             bundle1 = goods.difference(bundle2)
-            allocate_enhanced.trace("{} out of {} members in {} want {}, so group 2 gets {} and group 1 gets the rest".format(
+            allocate_using_enhanced_RWAV.trace("{} out of {} members in {} want {}, so group 2 gets {} and group 1 gets the rest".format(
                 nums[1],     families[1].num_of_members(),     families[1].name, g,                  g))
             return (bundle1,bundle2)
-    return allocate(families, goods)
-allocate_enhanced.trace = lambda *x: None  # To enable tracing, set allocate_enhanced.trace=print
+    return allocate_using_RWAV(families, goods)
+allocate_using_enhanced_RWAV.trace = lambda *x: None  # To enable tracing, set allocate_using_enhanced_RWAV.trace=print
 
 
 def allocate_twothirds(families:list, goods: set):
