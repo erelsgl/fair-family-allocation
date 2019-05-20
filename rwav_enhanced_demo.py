@@ -32,21 +32,21 @@ if __name__ == "__main__":
     # Run the protocol:
     rwav.allocate.trace = print
     print("\nRWAV protocol - group 1 plays first:")
-    rwav.allocate(family1, family2, "vwxyz")
+    [bundle1,bundle2] = rwav.allocate([family1, family2], "vwxyz")
     print("Final allocation:\n * Group 1: {}\n * Group 2: {}".format(
-    family1.allocation_description(family1.allocated_goods),
-    family2.allocation_description(family2.allocated_goods)))
+    family1.allocation_description(bundle1),
+    family2.allocation_description(bundle2)))
 
     rwav.allocate.trace = print
     print("\nRWAV protocol - group 1 and group 2 exchange roles:")
-    rwav.allocate(family2, family1, "vwxyz")
+    [bundle2, bundle1] = rwav.allocate([family2, family1], "vwxyz")
     print("Final allocation:\n * Group 1: {}\n * Group 2: {}".format(
-    family1.allocation_description(family1.allocated_goods),
-    family2.allocation_description(family2.allocated_goods)))
+    family1.allocation_description(bundle1),
+    family2.allocation_description(bundle2)))
 
     rwav.allocate_enhanced.trace = print
     print("\nEnhanced RWAV protocol with threshold 0.6:")
-    rwav.allocate_enhanced(family2, family1, "vwxyz", threshold=0.6)
+    [bundle2, bundle1] = rwav.allocate_enhanced([family2, family1], "vwxyz", threshold=0.6)
     print("Final allocation:\n * Group 1: {}\n * Group 2: {}".format(
-    family1.allocation_description(family1.allocated_goods),
-    family2.allocation_description(family2.allocated_goods)))
+    family1.allocation_description(bundle1),
+    family2.allocation_description(bundle2)))

@@ -12,6 +12,30 @@ import fairness_criteria
 from agents import *
 
 
+def member_weight(member: BinaryAgent, target_value: int, owned_goods: set, remaining_goods: set) -> float:
+    """
+    Calculate the voting-weight of the given member with the given owned goods and remaining goods.
+
+    >>> Alice = BinaryAgent({"w","x"})
+    >>> Bob   = BinaryAgent({"w","x","y","z"})
+    >>> member_weight(Alice, 1, set(), {"x","y","z"})
+    0.5
+    >>> member_weight(Bob, 2, set(), {"x","y","z"})
+    0.375
+    """
+    member_remaining_value = member.value(remaining_goods)  # the "r" of the member
+    member_current_value = member.value(owned_goods)
+    member_should_get_value = target_value - member_current_value  # the "s" of the member
+    the_member_weight = weight(member_remaining_value, member_should_get_value)
+    member_weight.trace("\t\t{} member{}\t\t{}\t\t{}\t{}\t{}".format(
+        member.cardinality, plural(member.cardinality),
+        sorted(member.desired_goods), member_remaining_value,
+        member_should_get_value, the_member_weight))
+    return the_member_weight
+member_weight.trace = lambda *x: None  # To enable tracing, set allocate.trace=True
+
+
+
 class BinaryFamily:
     """
     Represents a family of binary agents with a specific fairness criterion.
@@ -28,13 +52,13 @@ class BinaryFamily:
         :param fairness_criterion: a function that maps the agent's total value (- number of desired goods)
                                 to the agent's target value (- number of desired goods the family should have so that the agent is happy)
         """
-        self.members = list(members)
-        for member in self.members:
-            member.target_value = fairness_criterion(member.total_value())
+        members = list(members)
+        self.members = [(member, fairness_criterion(member.total_value()))
+                        for member in members]
         self.trace = lambda *x: None     # to trace, set self.trace = print
 
     def num_of_members(self):
-        return sum([member.cardinality for  member in self.members])
+        return sum([member.cardinality for  (member,target_value) in self.members])
 
     def num_of_members_who_want(self, good:str):
         """
@@ -49,7 +73,7 @@ class BinaryFamily:
         1
         """
         goods = set([good])
-        return sum([member.cardinality for  member in self.members if member.value(goods)>0])
+        return sum([member.cardinality for  (member,target_value) in self.members if member.value(goods)>0])
 
     def num_of_happy_members(self, bundle:set):
         """
@@ -69,35 +93,13 @@ class BinaryFamily:
         """
         bundle = set(bundle)
         return sum([member.cardinality
-                    for  member in self.members
-                    if member.value(bundle) >= member.target_value])
+                    for  (member,target_value) in self.members
+                    if member.value(bundle) >= target_value])
 
     def allocation_description(self, bundle:set)->str:
         return "Allocated bundle = {}, happy members = {}/{}".format(
             bundle, self.num_of_happy_members(bundle), self.num_of_members())
 
-    def member_weight(self, member:BinaryAgent, owned_goods:set, remaining_goods:set)->float:
-        """
-        Calculate the voting-weight of the given member with the given remaining goods.
-
-        >>> Alice = BinaryAgent({"w","x"})
-        >>> Bob   = BinaryAgent({"w","x","y","z"})
-        >>> fairness_1_of_2_mms = fairness_criteria.maximin_share_one_of_c(2)
-        >>> family = BinaryFamily([Alice,Bob], fairness_1_of_2_mms)
-        >>> family.member_weight(Alice, set(), {"x","y","z"})
-        0.5
-        >>> family.member_weight(Bob, set(), {"x","y","z"})
-        0.375
-        """
-        member_remaining_value  = member.value(remaining_goods)               # the "r" of the member
-        member_current_value    = member.value(owned_goods)
-        member_should_get_value = member.target_value - member_current_value  # the "s" of the member
-        member_weight = weight(member_remaining_value, member_should_get_value)
-        self.trace("\t\t{} member{}\t\t{}\t\t{}\t{}\t{}".format(
-            member.cardinality, plural(member.cardinality),
-            sorted(member.desired_goods), member_remaining_value,
-            member_should_get_value, member_weight))
-        return member_weight
 
     def choose_good(self, owned_goods:set, remaining_goods:set)->str:
         """
@@ -114,10 +116,10 @@ class BinaryFamily:
         map_good_to_total_weight = defaultdict(int)
         self.trace("\tCalculating member weights:")
         self.trace("\t\t         \t\tDesired set\t\tr\ts\tWeight")
-        for member in self.members:
-            member_weight           = self.member_weight(member, owned_goods, remaining_goods)
+        for (member,target_value) in self.members:
+            current_member_weight           = member_weight(member, target_value, owned_goods, remaining_goods)
             for good in member.desired_goods:
-                map_good_to_total_weight[good] += member_weight * member.cardinality
+                map_good_to_total_weight[good] += current_member_weight * member.cardinality
 
         self.trace("\tCalculating remaining good weights:")
         self.trace("\t\t \tWeight")
@@ -126,11 +128,8 @@ class BinaryFamily:
 
         return min(remaining_goods, key=lambda good: (-map_good_to_total_weight[good], good))
 
-
-
-
     def __repr__(self):
-        return "\n".join([" * "+member.__repr__() for member in self.members])
+        return "\n".join([" * "+member.__repr__() for (member,target_value) in self.members])
 
 
 def allocate(families:list, goods: set)->list:

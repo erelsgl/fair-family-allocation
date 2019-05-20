@@ -35,14 +35,14 @@ if __name__ == "__main__":
     rwav.allocate.trace = print
 
     print("\n\nRWAV protocol - group 1 plays first")
-    rwav.allocate(family1, family2, "wxyz")
+    [bundle1,bundle2] = rwav.allocate([family1, family2], "wxyz")
     print("Final allocation:\n * Group 1: {}\n * Group 2: {}".format(
-    family1.allocation_description(family1.allocated_goods),
-    family2.allocation_description(family2.allocated_goods)))
+    family1.allocation_description(bundle1),
+    family2.allocation_description(bundle2)))
 
     print("\n\nRWAV protocol - group 2 plays first")
-    rwav.allocate(family2, family1, "wxyz")
+    [bundle1, bundle2] = rwav.allocate([family2, family1], "wxyz")
     print("Final allocation:\n * Group 1: {}\n * Group 2: {}".format(
-    family1.allocation_description(family1.allocated_goods),
-    family2.allocation_description(family2.allocated_goods)))
+    family1.allocation_description(bundle1),
+    family2.allocation_description(bundle2)))
 
