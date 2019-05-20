@@ -32,7 +32,7 @@ def member_weight(member: BinaryAgent, target_value: int, owned_goods: set, rema
         sorted(member.desired_goods), member_remaining_value,
         member_should_get_value, the_member_weight))
     return the_member_weight
-member_weight.trace = lambda *x: None  # To enable tracing, set allocate.trace=True
+member_weight.trace = lambda *x: None  # To enable tracing, set allocate.trace=print
 
 
 
@@ -57,8 +57,8 @@ class BinaryFamily:
                         for member in members]
         self.trace = lambda *x: None     # to trace, set self.trace = print
 
-    def num_of_members(self):
-        return sum([member.cardinality for  (member,target_value) in self.members])
+    def num_of_members(self, predicate=lambda x:True)->int:
+        return sum([member.cardinality for  (member,target_value) in self.members if predicate(member)])
 
     def num_of_members_who_want(self, good:str):
         """
@@ -72,8 +72,7 @@ class BinaryFamily:
         >>> f.num_of_members_who_want("z")
         1
         """
-        goods = set([good])
-        return sum([member.cardinality for  (member,target_value) in self.members if member.value(goods)>0])
+        return self.num_of_members(lambda member: member.value(good)>0)
 
     def num_of_happy_members(self, bundle:set):
         """
@@ -166,7 +165,7 @@ def allocate(families:list, goods: set)->list:
         current_family_bundle.add(g)
         remaining_goods.remove(g)
     return bundles
-allocate.trace = lambda *x: None  # To enable tracing, set allocate.trace=True
+allocate.trace = lambda *x: None  # To enable tracing, set allocate.trace=print
 
 
 def allocate_enhanced(families:list, goods: set, threshold: float):
@@ -213,12 +212,55 @@ def allocate_enhanced(families:list, goods: set, threshold: float):
             allocate_enhanced.trace("{} out of {} members in group 2 want {}, so group 2 gets {} and group 1 gets the rest".format(
                 nums[1],     families[1].num_of_members(),     g,                  g))
             return (bundle1,bundle2)
-    allocate(families, goods)
-allocate_enhanced.trace = lambda *x: None  # To enable tracing, set allocate.trace=True
+    return allocate(families, goods)
+allocate_enhanced.trace = lambda *x: None  # To enable tracing, set allocate_enhanced.trace=print
 
 
+def allocate_twothirds(families:list, goods: set):
+    """
+    Run the protocol (see Section 3 in the paper) that guarantees to each family
+    2/3-democratic 1-of-best-2 fairness.
+    Currently, it works only for two identical families.
 
+    >>> fairness_1_of_best_2 = fairness_criteria.one_of_best_c(2)
+    >>> family1 = BinaryFamily([BinaryAgent({"w","x"},1),BinaryAgent({"x","y"},3),BinaryAgent({"y","z"},3), BinaryAgent({"w","v"},3)], fairness_1_of_best_2)
+    >>> (bundle1,bundle2) = allocate_twothirds([family1, family1], ["v","w","x","y","z"], 0.6)
+    >>> sorted(bundle1)
+    ['y']
+    >>> sorted(bundle2)
+    ['v', 'w', 'x', 'z']
+    """
+    if len(families)!=2:
+        raise("Currently only 2 families are supported")
+    goods = set(goods)
 
+    bundles = [set(), goods] # start, arbitrarily, with an allocation that gives all goods to family 2.
+    num_of_members = sum([family.num_of_members() for family in families])
+    num_of_iterations = 2*num_of_members   # this should be sufficient to convergence if the families are identical
+    for iteration in range(num_of_iterations):
+        # If there is a good $g\in G_1$ for which $q_0(g) > q_1(g)$, move $g$ to $G_2$.
+        allocate_twothirds.trace("Currently, group 1 holds {} and group 2 holds {}".format(bundles[0],bundles[1]))
+        change=False
+        for g in list(bundles[0]):
+            poor_in_2  = families[1].num_of_members(lambda member: member.value(g)>0 and member.value(bundles[1])==0)
+            poor_in_1  = families[0].num_of_members(lambda member: member.value(g)>0 and member.value(bundles[0])==1)
+            if poor_in_2>poor_in_1:
+                allocate_twothirds.trace("Moving {} from group 1 to group 2, harming {} members in and helping {}.".format(g, poor_in_1, poor_in_2))
+                bundles[0].remove(g)
+                bundles[1].add(g)
+                change=True
+        for g in list(bundles[1]):
+            poor_in_1 = families[0].num_of_members(lambda member: member.value(g)>0 and member.value(bundles[0])==0)
+            poor_in_2 = families[1].num_of_members(lambda member: member.value(g)>0 and member.value(bundles[1])==1)
+            if poor_in_1>poor_in_2:
+                allocate_twothirds.trace("Moving {} from group 2 to group 1, harming {} members and helping {}.".format(g, poor_in_2, poor_in_1))
+                bundles[1].remove(g)
+                bundles[0].add(g)
+                change=True
+        if not change:
+            break
+    return bundles
+allocate_twothirds.trace = lambda *x: None  # To enable tracing, set allocate_twothirds.trace=print
 
 
 @lru_cache(maxsize=None)

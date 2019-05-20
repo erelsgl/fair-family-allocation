@@ -113,6 +113,8 @@ class BinaryAgent(Agent):
         2
         >>> BinaryAgent({"x","y","z"}).value({"x","y"})
         2
+        >>> BinaryAgent({"x","y","z"}).value("y")
+        1
         >>> BinaryAgent({"x","y","z"}).value({"w"})
         0
         >>> BinaryAgent({"x","y","z"}).value(set())
@@ -120,10 +122,11 @@ class BinaryAgent(Agent):
         >>> BinaryAgent(set()).value({"x","y","z"})
         0
         """
-        if isinstance(goods,set):
-            return len(self.desired_goods.intersection(goods))
-        else:
-            raise ValueError("goods must be a set")
+        # if isinstance(goods,set):
+        goods = set(goods)
+        return len(self.desired_goods.intersection(goods))
+        # else:
+        #     raise ValueError("goods must be a set")
 
     def total_value(self):
         return self.the_total_value
