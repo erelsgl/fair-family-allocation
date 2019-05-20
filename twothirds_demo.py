@@ -9,10 +9,13 @@ See: https://arxiv.org/abs/1709.02564 for details.
 import rwav, fairness_criteria
 from agents import BinaryAgent
 from rwav import BinaryFamily
+import copy
 
 def demo(family:BinaryFamily, goods:set):
+    family1 = copy.copy(family); family1.name="Group 1"
+    family2 = copy.copy(family); family2.name="Group 2"
     print("\n\nThere are two identical groups with:\n{}".format(family))
-    rwav.demo(rwav.allocate_twothirds, [family, family], goods)
+    rwav.demo(rwav.allocate_twothirds, [family1, family2], goods)
 
 
 
