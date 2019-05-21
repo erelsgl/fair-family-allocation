@@ -7,5 +7,6 @@ run:
     python3 rwav_demo.py
     python3 enhanced_rwav_demo.py
     python3 twothirds_demo.py
+    python3 line_demo.py
 
 You can edit the demo files to change the instance details.

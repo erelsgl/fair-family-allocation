@@ -3,7 +3,7 @@
 """
 The line-allocation (1/2-democratic EF1 for two families with general monotone agents).
 
-See: https://arxiv.org/abs/1709.02564 Section 4 for details.
+See: https://arxiv.org/abs/1709.02564 Theorem 4.2 for details.
 """
 
 from agents import *
@@ -41,18 +41,19 @@ def allocate(families:list, goods: set)->list:
                 member.is_EF1(bundle, all_bundles)
 
     goods=list(goods)  # order the goods on a line
-    left_bundle = set()
-    right_bundle = set(goods)
-    bundles = [set(),set()]
+    left_sequence = list()
+    right_sequence = list(goods)
+    bundles = [None,None]
     for good in goods:
-        left_bundle.add(good)
-        right_bundle.remove(good)
-        allocate.trace("{} | {}:".format(left_bundle,right_bundle))
+        allocate.trace("\nCurrent partition:  {} | {}:".format(left_sequence,right_sequence))
         for family_index in range(len(families)):
             family = families[family_index]
+            left_bundle = set(left_sequence)
+            right_bundle = set(right_sequence)
             num_of_EF1_members = family.num_of_members_with(
                 lambda member: member.is_EF1(left_bundle, [right_bundle]))
-            allocate.trace("   {}: {}/{} members think the left bundle is EF1".format(family.name, num_of_EF1_members, family.num_of_members))
+            allocate.trace("   {}: {}/{} members think the left bundle is EF1".format(
+                family.name, num_of_EF1_members, family.num_of_members))
             if num_of_EF1_members >= 0.5*family.num_of_members:
                 other_family_index = 1 - family_index
                 other_family = families[other_family_index]
@@ -61,6 +62,8 @@ def allocate(families:list, goods: set)->list:
                 bundles[family_index] = left_bundle
                 bundles[other_family_index] = right_bundle
                 return bundles
+        left_sequence.append(good)
+        right_sequence.pop(0)
     raise AssertionError("The paper proves that the protocol must end with an allocation, but it did not - there must be a bug")
 
 allocate.trace = lambda *x: None  # To enable tracing, set allocate.trace=print

@@ -3,7 +3,7 @@
 """
 RWAV protocol - Round-Robin with Approval Voting (for two binary families)
 
-See: https://arxiv.org/abs/1709.02564 Section 3 for details.
+See: https://arxiv.org/abs/1709.02564 subsection 3.2.1 for details.
 """
 
 from functools import lru_cache

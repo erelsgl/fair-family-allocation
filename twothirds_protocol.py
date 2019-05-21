@@ -3,7 +3,7 @@
 """
 The Two-thirds allocation protocol (for two binary identical families)
 
-See: https://arxiv.org/abs/1709.02564 Section 3 for details.
+See: https://arxiv.org/abs/1709.02564 Theorem 3.14 for details.
 """
 
 from functools import lru_cache

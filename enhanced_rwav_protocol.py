@@ -3,7 +3,7 @@
 """
 Enhanced RWAV protocol (for two binary families)
 
-See: https://arxiv.org/abs/1709.02564 Section 3 for details.
+See: https://arxiv.org/abs/1709.02564 Theorem 3.13 for details.
 """
 
 import fairness_criteria

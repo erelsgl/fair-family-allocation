@@ -17,6 +17,8 @@ def demo(algorithm, families, goods, *args):
     """
     if len(families)!=2:
         raise("Currently only 2 families are supported")
+    for family in families:
+        print(family)
     bundles = algorithm(families, goods, *args)
     print("\nFinal allocation:\n * {}\n * {}".format(
         families[0].allocation_description(bundles[0], bundles),
