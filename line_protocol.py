@@ -50,11 +50,10 @@ def allocate(families:list, goods: set)->list:
             family = families[family_index]
             left_bundle = set(left_sequence)
             right_bundle = set(right_sequence)
-            num_of_EF1_members = family.num_of_members_with(
-                lambda member: member.is_EF1(left_bundle, [right_bundle]))
+            num_of_happy_members = family.num_of_happy_members(left_bundle, [right_bundle])
             allocate.trace("   {}: {}/{} members think the left bundle is EF1".format(
-                family.name, num_of_EF1_members, family.num_of_members))
-            if num_of_EF1_members >= 0.5*family.num_of_members:
+                family.name, num_of_happy_members, family.num_of_members))
+            if num_of_happy_members >= 0.5*family.num_of_members:
                 other_family_index = 1 - family_index
                 other_family = families[other_family_index]
                 allocate.trace("   {} gets the left bundle".format(family.name))
@@ -65,7 +64,6 @@ def allocate(families:list, goods: set)->list:
         left_sequence.append(good)
         right_sequence.pop(0)
     raise AssertionError("The paper proves that the protocol must end with an allocation, but it did not - there must be a bug")
-
 allocate.trace = lambda *x: None  # To enable tracing, set allocate.trace=print
 
 

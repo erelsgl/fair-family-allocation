@@ -8,7 +8,7 @@ See: https://arxiv.org/abs/1709.02564 for details.
 
 import fairness_criteria, rwav_protocol
 from agents import BinaryAgent
-from families import BinaryFamily
+from families import Family
 from utils import demo
 
 if __name__ == "__main__":
@@ -21,12 +21,12 @@ if __name__ == "__main__":
     rwav_protocol.member_weight.trace = print
 
     # Define families:
-    family1 = BinaryFamily([
+    family1 = Family([
         BinaryAgent("vx",2),
         BinaryAgent("vxy",1),
         BinaryAgent("wxyz",5),
         BinaryAgent("zw",3)], fairness_1_of_2_mms, name="Group 1")
-    family2 = BinaryFamily([
+    family2 = Family([
         BinaryAgent("wxyz",2),
         BinaryAgent("vz",3)], fairness_1_of_2_mms, name="Group 2")
 

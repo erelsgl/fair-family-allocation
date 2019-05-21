@@ -22,8 +22,8 @@ def allocate(families:list, goods: set)->list:
     :return a list of bundles - a bundle per family.
 
     >>> fairness_1_of_best_2 = fairness_criteria.one_of_best_c(2)
-    >>> family1 = BinaryFamily([BinaryAgent({"w","x"},1),BinaryAgent({"x","y"},2),BinaryAgent({"y","z"},3), BinaryAgent({"z","w"},4)], fairness_1_of_best_2)
-    >>> family2 = BinaryFamily([BinaryAgent({"w","z"},2),BinaryAgent({"z","y"},3)], fairness_1_of_best_2)
+    >>> family1 = Family([BinaryAgent({"w","x"},1),BinaryAgent({"x","y"},2),BinaryAgent({"y","z"},3), BinaryAgent({"z","w"},4)], fairness_1_of_best_2)
+    >>> family2 = Family([BinaryAgent({"w","z"},2),BinaryAgent({"z","y"},3)], fairness_1_of_best_2)
     >>> (bundle1,bundle2) = allocate([family1, family2], ["w","x","y","z"])
     >>> sorted(bundle1)
     ['x', 'z']
@@ -33,6 +33,14 @@ def allocate(families:list, goods: set)->list:
     n_families = len(families)
     if n_families!=2:
         raise("Currently only 2 families are supported")
+
+    # Set the target-value and the happiness criterion for every agent:
+    for family in families:
+        for member in family.members:
+            member.target_value = family.fairness_criterion(member.total_value)
+            member.is_happy = lambda bundle,all_bundles,member=member: \
+                member.value(bundle) >= member.target_value
+
     remaining_goods=set(goods)
     bundles = [set() for f in families]
 
@@ -60,7 +68,7 @@ GOODS_WEIGHT_FORMAT = "{0: <6}{1: <9}"
 
 
 
-def choose_good(family:BinaryFamily, owned_goods:set, remaining_goods:set)->str:
+def choose_good(family:Family, owned_goods:set, remaining_goods:set)->str:
     """
     Calculate the good that the family chooses from the set of remaining goods.
     It uses weighted-approval-voting.
@@ -68,7 +76,9 @@ def choose_good(family:BinaryFamily, owned_goods:set, remaining_goods:set)->str:
     >>> agent1 = BinaryAgent({"x","y"})
     >>> agent2 = BinaryAgent({"z","w"})
     >>> fairness_1_of_best_2 = lambda r: 1 if r>=2 else 0
-    >>> family = BinaryFamily([agent1,agent2], fairness_1_of_best_2)
+    >>> family = Family([agent1,agent2], fairness_1_of_best_2)
+    >>> agent1.target_value = fairness_1_of_best_2(agent1.total_value)
+    >>> agent2.target_value = fairness_1_of_best_2(agent2.total_value)
     >>> choose_good(family, set(), {"x","y","z"})
     'z'
     """

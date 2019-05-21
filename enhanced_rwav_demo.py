@@ -8,7 +8,7 @@ See: https://arxiv.org/abs/1709.02564 for details.
 
 import fairness_criteria, enhanced_rwav_protocol, rwav_protocol
 from agents import BinaryAgent
-from families import BinaryFamily
+from families import Family
 from utils import demo
 
 if __name__ == "__main__":
@@ -19,13 +19,13 @@ if __name__ == "__main__":
     rwav_protocol.allocate.trace = print
 
     # Define families:
-    family1 = BinaryFamily([
+    family1 = Family([
         BinaryAgent("vw",3),
         BinaryAgent("vx",3),
         BinaryAgent("vy",2),
         BinaryAgent("vz",2)], fairness_1_of_best_2, name="Group 1")
     print(family1)
-    family2 = BinaryFamily(
+    family2 = Family(
         [BinaryAgent(goods, 1) for goods in ["vw","vx","vy","vz","wx","wy","wz","xy","xz","yz"]],
         fairness_1_of_best_2, name="Group 2")
     print(family2)
