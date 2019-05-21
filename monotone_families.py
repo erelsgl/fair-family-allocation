@@ -1,9 +1,10 @@
 #!python3
 
 """
-Implementation of the RWAV protocol - Round-Robin with Approval Voting.
+Allocation algorithms for families with monotone agents:
+* Line protocol (EF1 for two monotone families).
 
-See: https://arxiv.org/abs/1709.02564 for details.
+See: https://arxiv.org/abs/1709.02564 Section 4 for details.
 """
 
 from functools import lru_cache
@@ -11,84 +12,28 @@ from collections import defaultdict
 import fairness_criteria
 from agents import *
 
-class BinaryFamily:
+class MonotoneFamily:
     """
-    Represents a family of binary agents with a specific fairness criterion.
-
-    >>> fairness_1_of_best_2 = lambda r: 1 if r>=2 else 0
-    >>> BinaryFamily([BinaryAgent({"x", "y"}, 2), BinaryAgent({"z", "w"}, 1)], fairness_1_of_best_2)
-     * 2 agents who want ['x', 'y']
-     * 1 agent  who want ['w', 'z']
+    Represents a family of monotone agents.
     """
-    def __init__(self, members:list, fairness_criterion, name:str="Anonymous Binary Family"):
+    def __init__(self, members:list, name:str="Anonymous Monotone Family"):
         """
-        Initializes a family with the given list of agents.
-        :param members: a list of BinaryAgent objects.
-        :param fairness_criterion: a function that maps the agent's total value (- number of desired goods)
-                                to the agent's target value (- number of desired goods the family should have so that the agent is happy)
+        Initializes a family with the given list of members.
+        :param members: a list of MonotoneAgent objects.
         """
-        members = list(members)
-        self.members = [(member, fairness_criterion(member.total_value()))
-                        for member in members]
-        self.name = name
-
-    def num_of_members(self, predicate=lambda x:True)->int:
-        return sum([member.cardinality for  (member,target_value) in self.members if predicate(member)])
-
-    def num_of_members_who_want(self, good:str):
-        """
-        Return the number of family members who want the given good.
-
-        >>> f = BinaryFamily([BinaryAgent({"x", "y"}, 2), BinaryAgent({"y", "z"}, 1)], fairness_criteria.one_of_best_c(2))
-        >>> f.num_of_members_who_want("x")
-        2
-        >>> f.num_of_members_who_want("y")
-        3
-        >>> f.num_of_members_who_want("z")
-        1
-        """
-        return self.num_of_members(lambda member: member.value(good)>0)
-
-    def num_of_happy_members(self, bundle:set):
-        """
-        Return the number of family members who are "happy" (- feel fair) with the given bundle.
-
-        >>> f = BinaryFamily([BinaryAgent("vwxy", 2), BinaryAgent("yz", 1)], fairness_criteria.maximin_share_one_of_c(2))
-        >>> f.num_of_happy_members("x")
-        0
-        >>> f.num_of_happy_members("y")
-        1
-        >>> f.num_of_happy_members("z")
-        1
-        >>> f.num_of_happy_members("wx")
-        2
-        >>> f.num_of_happy_members("xy")
-        3
-        """
-        bundle = set(bundle)
-        return sum([member.cardinality
-                    for  (member,target_value) in self.members
-                    if member.value(bundle) >= target_value])
-
-    def allocation_description(self, bundle:set)->str:
-        return "Allocated bundle = {}, happy members = {}/{}".format(
-            bundle, self.num_of_happy_members(bundle), self.num_of_members())
-
-    def __repr__(self):
-        return "\n".join([" * "+member.__repr__() for (member,target_value) in self.members])
+        super().__init__(members, name)
 
 
 
-def allocate_using_RWAV(families:list, goods: set)->list:
+def allocate_on_a_line(families:list, goods: set)->list:
     """
-    Run the RWAV protocol (Round Robin with Weighted Voting) on the given families.
+    Order the goods on a line and allocate them in an EF1 way.
     Currently only 2 families are supported.
-    Return a list of bundles - a bundle per family.
+    :return a list of bundles - a bundle per family.
 
-    >>> fairness_1_of_best_2 = fairness_criteria.one_of_best_c(2)
-    >>> family1 = BinaryFamily([BinaryAgent({"w","x"},1),BinaryAgent({"x","y"},2),BinaryAgent({"y","z"},3), BinaryAgent({"z","w"},4)], fairness_1_of_best_2)
-    >>> family2 = BinaryFamily([BinaryAgent({"w","z"},2),BinaryAgent({"z","y"},3)], fairness_1_of_best_2)
-    >>> (bundle1,bundle2) = allocate_using_RWAV([family1, family2], ["w","x","y","z"])
+    >>> family1 = MonotoneFamily([BinaryAgent({"w","x"},1),BinaryAgent({"x","y"},2),BinaryAgent({"y","z"},3), BinaryAgent({"z","w"},4)])
+    >>> family2 = MonotoneFamily([BinaryAgent({"w","z"},2),BinaryAgent({"z","y"},3)])
+    >>> (bundle1,bundle2) = allocate_on_a_line([family1, family2], ["w","x","y","z"])
     >>> sorted(bundle1)
     ['x', 'z']
     >>> sorted(bundle2)
@@ -97,23 +42,24 @@ def allocate_using_RWAV(families:list, goods: set)->list:
     n_families = len(families)
     if n_families!=2:
         raise("Currently only 2 families are supported")
-    remaining_goods=set(goods)
+    remaining_goods=list(goods)  # order the goods on a line
     bundles = [set() for f in families]
 
+    ###### STOPPED HERE #########
     turn_index = 0
     family_index = 0
     while len(remaining_goods) > 0:
         current_family = families[family_index]
         current_family_bundle = bundles[family_index]
-        allocate_using_RWAV.trace("\nTurn #{}: {}'s turn to pick a good from {}:".format(turn_index + 1, current_family.name, sorted(remaining_goods)))
+        allocate_on_a_line.trace("\nTurn #{}: {}'s turn to pick a good from {}:".format(turn_index + 1, current_family.name, sorted(remaining_goods)))
         g = choose_good(current_family, current_family_bundle, remaining_goods)
-        allocate_using_RWAV.trace("{} picks {}".format(current_family.name, g))
+        allocate_on_a_line.trace("{} picks {}".format(current_family.name, g))
         current_family_bundle.add(g)
         remaining_goods.remove(g)
         turn_index += 1
         family_index = (family_index + 1) % n_families
     return bundles
-allocate_using_RWAV.trace = lambda *x: None  # To enable tracing, set allocate_using_RWAV.trace=print
+allocate_on_a_line.trace = lambda *x: None  # To enable tracing, set allocate_using_RWAV.trace=print
 
 
 

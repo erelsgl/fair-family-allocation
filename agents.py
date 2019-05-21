@@ -1,37 +1,93 @@
 #!python3
 
 """
-Defines agents with general, additive and binary preferences.
+Classes that represent agents with general, additive and binary preferences.
 """
 
-import abc
 
-
-def plural(i: int)->str:
-    return " " if i==1 else "s"
+import abc  # abstract classes
+from utils import plural
 
 
 class Agent(metaclass=abc.ABCMeta):
     """
-    Represents an agent or several agents with an abstract valuation function.
+    An abstract class.
+    Represents an agent or several agents with the same valuation function.
     """
 
     def __init__(self, total_value:float, cardinality:int=1):
-        self.the_total_value = total_value
+        self.total_value = total_value
         self.cardinality = cardinality
 
     @abc.abstractmethod
-    def value(self, goods:set)->int:
+    def value(self, bundle:set)->int:
         """
-        Calculates the agent's value for the given set of goods.
+        Abstract method: - to be overridden in sub-classes.
+                 Should calculate the agent's value for the given bundle of goods.
         """
 
-    def total_value(self):
+    def value_except_best_good(self, bundle:set)->int:
         """
-        Calculates the agent's value for the entire set of goods.
+        Calculates the value of the given bundle when the "best" good is removed from it.
+        Formally, it calculates:
+              min [g in bundle] value (bundle - g)
+        This is a subroutine in checking whether an allocation is EF1.
         """
-        return self.the_total_value
+        return min([
+            self.value(bundle.difference(set(good)))
+            for good in bundle
+        ])
 
+    def value_except_worst_good(self, bundle:set)->int:
+        """
+        Calculates the value of the given bundle when the "worst" good is removed from it.
+        Formally, it calculates:
+              max [g in bundle] value (bundle - g)
+        This is a subroutine in checking whether an allocation is EFx.
+        """
+        return max([
+            self.value(bundle.difference(set(good)))
+            for good in bundle
+        ])
+
+    def is_EF1(self, own_bundle: set, all_bundles: list)->bool:
+        """
+        Checks whether the current agent finds the given allocation EF1.
+        :param own_bundle:   the bundle given to the family of the current agent.
+        :param all_bundles:  a list of all bundles.
+        :return: True iff the current agent finds the allocation EF1.
+        """
+        own_value = self.value(own_bundle)
+        for other_bundle in all_bundles:
+            if own_value < self.value_except_best_good(other_bundle):
+                return False
+        return True
+
+    def is_EFx(self, own_bundle: set, all_bundles: list)->bool:
+        """
+        Checks whether the current agent finds the given allocation EFx.
+        :param own_bundle:   the bundle given to the family of the current agent.
+        :param all_bundles:  a list of all bundles.
+        :return: True iff the current agent finds the allocation EFx.
+        """
+        own_value = self.value(own_bundle)
+        for other_bundle in all_bundles:
+            if own_value < self.value_except_worst_good(other_bundle):
+                return False
+        return True
+
+    def is_EF(self, own_bundle: set, all_bundles: list)->bool:
+        """
+        Checks whether the current agent finds the given allocation envy-free.
+        :param own_bundle:   the bundle given to the family of the current agent.
+        :param all_bundles:  a list of all bundles.
+        :return: True iff the current agent finds the allocation envy-free.
+        """
+        own_value = self.value(own_bundle)
+        for other_bundle in all_bundles:
+            if own_value < self.value(other_bundle):
+                return False
+        return True
 
 
 class MonotoneAgent(Agent):
@@ -49,6 +105,12 @@ class MonotoneAgent(Agent):
     4
     >>> a.value({"y","x"})
     4
+    >>> a.is_EF({"x"}, [{"y"}])
+    False
+    >>> a.is_EF1({"x"}, [{"y"}])
+    True
+    >>> a.is_EFx({"x"}, [{"y"}])
+    True
     >>> MonotoneAgent({"x": 1, "y": 2, "xy": 4}, cardinality=2)
     2 agents with monotone valuations
 
@@ -76,12 +138,6 @@ class MonotoneAgent(Agent):
         else:
             raise ValueError("The value of {} is not specified in the valuation function".format(goods))
 
-    def total_value(self):
-        """
-        Calculates the agent's value for the entire set of goods.
-        """
-        return self.the_total_value
-
     def __repr__(self):
         return "{} agent{} with monotone valuations".format(self.cardinality, plural(self.cardinality))
 
@@ -90,8 +146,19 @@ class BinaryAgent(Agent):
     """
     Represents an agent with binary valuations, or several agents with the same binary valuations.
 
-    >>> BinaryAgent({"x","y","z"})
+    >>> a = BinaryAgent({"x","y","z"})
+    >>> a
     1 agent  who want ['x', 'y', 'z']
+    >>> a.value({"x","w"})
+    1
+    >>> a.value({"y","z"})
+    2
+    >>> a.is_EF({"x","w"},[{"y","z"}])
+    False
+    >>> a.is_EF1({"x","w"},[{"y","z"}])
+    True
+    >>> a.is_EF1({"v","w"},[{"y","z"}])
+    False
     >>> BinaryAgent({"x","y","z"}, 2)
     2 agents who want ['x', 'y', 'z']
     """
@@ -127,9 +194,6 @@ class BinaryAgent(Agent):
         return len(self.desired_goods.intersection(goods))
         # else:
         #     raise ValueError("goods must be a set")
-
-    def total_value(self):
-        return self.the_total_value
 
     def __repr__(self):
         return "{} agent{} who want {}".format(self.cardinality, plural(self.cardinality), sorted(self.desired_goods))
