@@ -49,7 +49,7 @@ def allocate(families:list, goods: set)->list:
         turn_index += 1
         family_index = (family_index + 1) % n_families
     return bundles
-allocate.trace = lambda *x: None  # To enable tracing, set allocate_using_RWAV.trace=print
+allocate.trace = lambda *x: None  # To enable tracing, set allocate.trace=print
 
 
 

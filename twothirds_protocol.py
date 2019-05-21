@@ -33,8 +33,8 @@ def allocate(families:list, goods: set):
     goods = set(goods)
 
     bundles = [set(), goods] # start, arbitrarily, with an allocation that gives all goods to family 2.
-    num_of_members = sum([family.num_of_members for family in families])
-    num_of_iterations = 2*num_of_members   # this should be sufficient to convergence if the families are identical
+    total_num_of_members = sum([family.num_of_members for family in families])
+    num_of_iterations = 2*total_num_of_members   # this should be sufficient to convergence if the families are identical
     for iteration in range(num_of_iterations):
         # If there is a good $g\in G_1$ for which $q_0(g) > q_1(g)$, move $g$ to $G_2$.
         allocate.trace("Currently, {} holds {} and {} holds {}".format(families[0].name, bundles[0], families[1].name, bundles[1]))

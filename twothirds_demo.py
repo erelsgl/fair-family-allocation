@@ -6,7 +6,7 @@ Demonstration of the two-thirds protocol.
 See: https://arxiv.org/abs/1709.02564 for details.
 """
 
-import twothirds_algorithm, fairness_criteria
+import twothirds_protocol, fairness_criteria
 from agents import BinaryAgent
 from families import BinaryFamily
 import utils
@@ -18,7 +18,7 @@ def demo(family:BinaryFamily, goods:set):
     family2 = copy.copy(family); family2.name="Group 2"
     print(family1)
     print(family2.name+" is identical.")
-    utils.demo(twothirds_algorithm.allocate, [family1, family2], goods)
+    utils.demo(twothirds_protocol.allocate, [family1, family2], goods)
 
 
 
@@ -26,7 +26,7 @@ if __name__ == "__main__":
 
     # Define fairness criteria:
     fairness_1_of_best_2 = fairness_criteria.one_of_best_c(2)
-    twothirds_algorithm.allocate.trace = print
+    twothirds_protocol.allocate.trace = print
     goods = "vwxyz"
 
     family1 = BinaryFamily([

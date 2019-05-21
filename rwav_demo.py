@@ -6,7 +6,7 @@ Demonstration of the RWAV protocol - Round-Robin with Approval Voting.
 See: https://arxiv.org/abs/1709.02564 for details.
 """
 
-import fairness_criteria, rwav
+import fairness_criteria, rwav_protocol
 from agents import BinaryAgent
 from families import BinaryFamily
 from utils import demo
@@ -16,9 +16,9 @@ if __name__ == "__main__":
     # define fairness criteria:
     fairness_1_of_2_mms  = fairness_criteria.maximin_share_one_of_c(2)
     fairness_1_of_best_2 = fairness_criteria.one_of_best_c(2)
-    rwav.allocate.trace = print
-    rwav.choose_good.trace = print
-    rwav.member_weight.trace = print
+    rwav_protocol.allocate.trace = print
+    rwav_protocol.choose_good.trace = print
+    rwav_protocol.member_weight.trace = print
 
     # Define families:
     family1 = BinaryFamily([
@@ -34,8 +34,8 @@ if __name__ == "__main__":
 
     # Run the protocol:
     print("\n\nRWAV protocol - {} plays first".format(family1.name))
-    demo(rwav.allocate, [family1, family2], "wxyz")
+    demo(rwav_protocol.allocate, [family1, family2], "wxyz")
 
     print("\n\nRWAV protocol - {} plays first".format(family2.name))
-    demo(rwav.allocate, [family2, family1], "wxyz")
+    demo(rwav_protocol.allocate, [family2, family1], "wxyz")
 

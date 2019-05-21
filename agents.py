@@ -33,7 +33,8 @@ class Agent(metaclass=abc.ABCMeta):
               min [g in bundle] value (bundle - g)
         This is a subroutine in checking whether an allocation is EF1.
         """
-        return min([
+        if len(bundle)==0: return 0
+        else: return min([
             self.value(bundle.difference(set(good)))
             for good in bundle
         ])
@@ -45,7 +46,8 @@ class Agent(metaclass=abc.ABCMeta):
               max [g in bundle] value (bundle - g)
         This is a subroutine in checking whether an allocation is EFx.
         """
-        return max([
+        if len(bundle)==0: return 0
+        else: return max([
             self.value(bundle.difference(set(good)))
             for good in bundle
         ])
@@ -158,6 +160,10 @@ class BinaryAgent(Agent):
     >>> a.is_EF1({"x","w"},[{"y","z"}])
     True
     >>> a.is_EF1({"v","w"},[{"y","z"}])
+    False
+    >>> a.is_EF1(set(),[{"y","w"}])
+    True
+    >>> a.is_EF1(set(),[{"y","z"}])
     False
     >>> BinaryAgent({"x","y","z"}, 2)
     2 agents who want ['x', 'y', 'z']

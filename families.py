@@ -5,8 +5,7 @@ Classes that represent families (groups) of agents.
 """
 
 
-import agents
-
+from agents import *
 
 class Family:
     """
@@ -79,3 +78,10 @@ class BinaryFamily(Family):
             member.is_happy = lambda bundle,all_bundles,member=member: \
                 member.value(bundle) >= member.target_value
 
+
+
+
+if __name__ == "__main__":
+    import doctest
+    (failures,tests) = doctest.testmod(report=True)
+    print ("{} failures, {} tests".format(failures,tests))

@@ -6,7 +6,7 @@ Demonstration of the RWAV and enhanced RWAV protocols.
 See: https://arxiv.org/abs/1709.02564 for details.
 """
 
-import fairness_criteria, enhanced_rwav, rwav
+import fairness_criteria, enhanced_rwav_protocol, rwav_protocol
 from agents import BinaryAgent
 from families import BinaryFamily
 from utils import demo
@@ -15,8 +15,8 @@ if __name__ == "__main__":
 
     # Define fairness criteria:
     fairness_1_of_best_2 = fairness_criteria.one_of_best_c(2)
-    enhanced_rwav.allocate.trace = print
-    rwav.allocate.trace = print
+    enhanced_rwav_protocol.allocate.trace = print
+    rwav_protocol.allocate.trace = print
 
     # Define families:
     family1 = BinaryFamily([
@@ -32,13 +32,13 @@ if __name__ == "__main__":
 
 
     # Run the protocol:
-    rwav.allocate.trace = print
+    rwav_protocol.allocate.trace = print
     print("\n\nRWAV protocol - group 1 plays first:")
-    demo(rwav.allocate, [family1, family2], "vwxyz")
+    demo(rwav_protocol.allocate, [family1, family2], "vwxyz")
 
     print("\n\nRWAV protocol - group 1 and group 2 exchange roles:")
-    demo(rwav.allocate, [family2, family1], "vwxyz")
+    demo(rwav_protocol.allocate, [family2, family1], "vwxyz")
 
     threshold=0.6
     print("\n\nEnhanced RWAV protocol with threshold {}:".format(threshold))
-    demo(enhanced_rwav.allocate, [family1, family2], "vwxyz", threshold)
+    demo(enhanced_rwav_protocol.allocate, [family1, family2], "vwxyz", threshold)

@@ -9,7 +9,7 @@ See: https://arxiv.org/abs/1709.02564 Section 3 for details.
 import fairness_criteria
 from agents import *
 from families import *
-import rwav
+import rwav_protocol
 
 
 def allocate(families:list, goods: set, threshold: float):
@@ -37,10 +37,7 @@ def allocate(families:list, goods: set, threshold: float):
     """
     if len(families)!=2:
         raise("Currently only 2 families are supported")
-
-    bundles = [set() for f in families]
     goods = set(goods)
-
     thresholds = [threshold*family.num_of_members for family in families]
     for g in goods:
         nums = [family.num_of_members_with(lambda member: member.value(g)>0)
@@ -57,8 +54,8 @@ def allocate(families:list, goods: set, threshold: float):
             allocate.trace("{} out of {} members in {} want {}, so group 2 gets {} and group 1 gets the rest".format(
                 nums[1],     families[1].num_of_members,     families[1].name, g,                  g))
             return (bundle1,bundle2)
-    return rwav.allocate(families, goods)
-allocate.trace = lambda *x: None  # To enable tracing, set allocate_using_enhanced_RWAV.trace=print
+    return rwav_protocol.allocate(families, goods)
+allocate.trace = lambda *x: None  # To enable tracing, set allocate.trace=print
 
 
 
