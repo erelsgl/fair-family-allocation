@@ -21,7 +21,7 @@ def allocate(families:list, goods: set, threshold: float):
       If there is a single good g that is wanted by at least this fraction of members in one of the families,
       then this family gets g and the other family gets the other goods.
 
-    >>> fairness_1_of_best_2 = fairness_criteria.one_of_best_c(2)
+    >>> fairness_1_of_best_2 = fairness_criteria.OneOfBestC(2)
     >>> family1 = Family([BinaryAgent({"w","x"},1),BinaryAgent({"x","y"},3),BinaryAgent({"y","z"},3), BinaryAgent({"w","v"},3)], fairness_1_of_best_2)
     >>> family2 = Family([BinaryAgent({"w","x"},5),BinaryAgent({"y","z"},5)], fairness_1_of_best_2)
     >>> (bundle1,bundle2) = allocate([family1, family2], ["v","w","x","y","z"], threshold=0.6)
@@ -37,12 +37,6 @@ def allocate(families:list, goods: set, threshold: float):
     """
     if len(families)!=2:
         raise("Currently only 2 families are supported")
-
-    # Set the happiness criterion for every agent to 1-of-best-2
-    for family in families:
-        for member in family.members:
-            member.is_happy = lambda bundle,all_bundles,member=member: \
-                member.value(bundle) >= fairness_criteria.one_of_best_c(2)(member.total_value)
 
     goods = set(goods)
     thresholds = [threshold*family.num_of_members for family in families]

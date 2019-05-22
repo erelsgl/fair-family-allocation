@@ -20,7 +20,7 @@ def allocate(families:list, goods: set):
     :return a list of bundles - a bundle per family.
 
 
-    >>> fairness_1_of_best_2 = fairness_criteria.one_of_best_c(2)
+    >>> fairness_1_of_best_2 = fairness_criteria.OneOfBestC(2)
     >>> family1 = Family([BinaryAgent("wx",1),BinaryAgent("yz",1)], fairness_1_of_best_2)
     >>> (bundle1,bundle2) = allocate([family1, family1], "wxyz")
     >>> len(bundle1)
@@ -30,12 +30,6 @@ def allocate(families:list, goods: set):
     """
     if len(families)!=2:
         raise("Currently only 2 families are supported")
-
-    # Set the happiness criterion for every agent to 1-of-best-2
-    for family in families:
-        for member in family.members:
-            member.is_happy = lambda bundle,all_bundles,member=member: \
-                member.value(bundle) >= fairness_criteria.one_of_best_c(2)(member.total_value)
 
     goods = set(goods)
     bundles = [set(), goods] # start, arbitrarily, with an allocation that gives all goods to family 2.

@@ -8,6 +8,7 @@ See: https://arxiv.org/abs/1709.02564 Theorem 4.2 for details.
 
 from agents import *
 from families import Family
+import fairness_criteria
 
 
 
@@ -17,8 +18,9 @@ def allocate(families:list, goods: set)->list:
     Currently only 2 families are supported.
     :return a list of bundles - a bundle per family.
 
-    >>> family1 = Family([BinaryAgent({"w","x"},1),BinaryAgent({"x","y"},2),BinaryAgent({"y","z"},3), BinaryAgent({"z","w"},4)], name="Family 1")
-    >>> family2 = Family([BinaryAgent({"w","z"},2),BinaryAgent({"z","y"},3)], name="Family 2")
+    >>> fairness_EF1 = fairness_criteria.EnvyFreeExceptC(1)
+    >>> family1 = Family([BinaryAgent({"w","x"},1),BinaryAgent({"x","y"},2),BinaryAgent({"y","z"},3), BinaryAgent({"z","w"},4)], fairness_criterion=fairness_EF1, name="Family 1")
+    >>> family2 = Family([BinaryAgent({"w","z"},2),BinaryAgent({"z","y"},3)], fairness_criterion=fairness_EF1, name="Family 2")
     >>> (bundle1,bundle2) = allocate([family1, family2], ["w","x","y","z"])
     >>> sorted(bundle1)
     ['w']
@@ -33,12 +35,6 @@ def allocate(families:list, goods: set)->list:
     n_families = len(families)
     if n_families!=2:
         raise("Currently only 2 families are supported")
-
-    # Set the happiness criterion for all agents to EF1:
-    for family in families:
-        for member in family.members:
-            member.is_happy = lambda bundle, all_bundles, member=member: \
-                member.is_EF1(bundle, all_bundles)
 
     goods=list(goods)  # order the goods on a line
     left_sequence = list()

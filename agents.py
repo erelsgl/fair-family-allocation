@@ -5,25 +5,24 @@ Classes that represent agents with general, additive and binary preferences.
 """
 
 
-import abc  # abstract classes
+from abc import ABC, abstractmethod        # Abstract Base Class
 from utils import plural
 
 
-class Agent(metaclass=abc.ABCMeta):
+class Agent(ABC):
     """
     An abstract class.
     Represents an agent or several agents with the same valuation function.
     """
 
-    def __init__(self, total_value:float, cardinality:int=1):
+    def __init__(self, total_value:int, cardinality:int=1):
         self.total_value = total_value
         self.cardinality = cardinality
 
-    @abc.abstractmethod
+    @abstractmethod
     def value(self, bundle:set)->int:
         """
-        Abstract method: - to be overridden in sub-classes.
-                 Should calculate the agent's value for the given bundle of goods.
+        This abstract method should calculate the agent's value for the given bundle of goods.
         """
 
     def value_except_best_good(self, bundle:set)->int:
