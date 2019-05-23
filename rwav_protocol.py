@@ -13,6 +13,7 @@ from agents import *
 from families import *
 from utils import plural
 
+trace = lambda *x: None  # To enable tracing, set trace=print
 
 
 def allocate(families:list, goods: set)->list:
@@ -42,15 +43,15 @@ def allocate(families:list, goods: set)->list:
     while len(remaining_goods) > 0:
         current_family = families[family_index]
         current_family_bundle = bundles[family_index]
-        allocate.trace("\nTurn #{}: {}'s turn to pick a good from {}:".format(turn_index + 1, current_family.name, sorted(remaining_goods)))
+        trace("\nTurn #{}: {}'s turn to pick a good from {}:".format(turn_index + 1, current_family.name, sorted(remaining_goods)))
         g = choose_good(current_family, current_family_bundle, remaining_goods)
-        allocate.trace("{} picks {}".format(current_family.name, g))
+        trace("{} picks {}".format(current_family.name, g))
         current_family_bundle.add(g)
         remaining_goods.remove(g)
         turn_index += 1
         family_index = (family_index + 1) % n_families
     return bundles
-allocate.trace = lambda *x: None  # To enable tracing, set allocate.trace=print
+trace = lambda *x: None  # To enable tracing, set trace=print
 
 
 

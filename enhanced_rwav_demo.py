@@ -12,11 +12,11 @@ from families import Family
 from utils import demo
 
 if __name__ == "__main__":
+    enhanced_rwav_protocol.trace = print
+    rwav_protocol.trace = print
 
     # Define fairness criteria:
     fairness_1_of_best_2 = fairness_criteria.OneOfBestC(2)
-    enhanced_rwav_protocol.allocate.trace = print
-    rwav_protocol.allocate.trace = print
 
     # Define families:
     family1 = Family([

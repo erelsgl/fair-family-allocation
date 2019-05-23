@@ -14,9 +14,9 @@ import fairness_criteria
 
 
 if __name__ == "__main__":
+    line_protocol.trace = print
 
     # Define fairness criteria:
-    line_protocol.allocate.trace = print
     goods = "vwxyz"
 
     family1 = Family([

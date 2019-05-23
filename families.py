@@ -30,6 +30,7 @@ class Family:
     "Family 1: allocated bundle = {'z'}, happy members = 2/3"
 
     """
+
     def __init__(self, members:list, fairness_criterion:FairnessCriterion, name:str="Anonymous Family"):
         """
         Initialize a family with the given list of agents.

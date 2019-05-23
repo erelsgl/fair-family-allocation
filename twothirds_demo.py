@@ -23,10 +23,10 @@ def demo(family:Family, goods:set):
 
 
 if __name__ == "__main__":
+    twothirds_protocol.trace = print
 
     # Define fairness criteria:
     fairness_1_of_best_2 = fairness_criteria.OneOfBestC(2)
-    twothirds_protocol.allocate.trace = print
     goods = "vwxyz"
 
     family1 = Family([
