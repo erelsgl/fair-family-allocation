@@ -15,7 +15,7 @@ class Family:
 
     >>> family1 = Family([BinaryAgent("xy",1), BinaryAgent("yz",2)], fairness_criteria.OneOfBestC(2), name="Family 1")
     >>> family1
-    Family 1 has:
+    Family 1 seeks one-of-best-2 and has:
      * 1 agent  who want ['x', 'y']
      * 2 agents who want ['y', 'z']
     >>> family1.num_of_members
@@ -63,7 +63,7 @@ class Family:
             self.name, bundle, self.num_of_happy_members(bundle, all_bundles), self.num_of_members)
 
     def __repr__(self):
-        return self.name + " has:\n"+"\n".join([" * "+member.__repr__() for member in self.members])
+        return "{} seeks {} and has:\n".format(self.name, self.fairness_criterion.name)+"\n".join([" * "+member.__repr__() for member in self.members])
 
 
 

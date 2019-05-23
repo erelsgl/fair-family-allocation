@@ -32,8 +32,18 @@ if __name__ == "__main__":
         BinaryAgent("vx",3),
         BinaryAgent("vy",2),
         BinaryAgent("vz",2)], fairness_criteria.EnvyFreeExceptC(1), name="Group 3")
+
+    print("\n\n\ndemocratic-EF1 allocation among two groups:")
     demo(line_protocol.allocate, [family1, family2], "wxyz")
     print("\n\n\n")
     demo(line_protocol.allocate, [family1, family3], "vwxyz")
     print("\n\n\n")
     demo(line_protocol.allocate, [family2, family3], "zyxwv")
+
+    print("\n\n\ndemocratic-fair allocation among three groups:")
+    k = 3
+    family1.fairness_criterion = fairness_criteria.MaximinShareOneOfC(c=2*k-1)
+    family2.fairness_criterion = fairness_criteria.MaximinShareOneOfC(c=k, approximation_factor=1/k)
+    family3.fairness_criterion = fairness_criteria.ProportionalExceptC(c=k-1, num_of_agents=k)
+    demo(line_protocol.allocate, [family1, family2, family3], "vwxyz")
+
