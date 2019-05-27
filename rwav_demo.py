@@ -28,12 +28,12 @@ if __name__ == "__main__":
         BinaryAgent("zw",3)], fairness_1_of_2_mms, name="Group 1")
     family2 = Family([
         BinaryAgent("wxyz",2),
-        BinaryAgent("vz",3)], fairness_1_of_2_mms, name="Group 2")
+        BinaryAgent("vz",3)], fairness_1_of_best_2, name="Group 2")
 
     # Run the protocol:
     print("\n\n\nRWAV protocol - {} plays first".format(family1.name))
-    demo(rwav_protocol.allocate, [family1, family2], "wxyz")
+    demo(rwav_protocol.allocate, [family1, family2], "vwxyz")
 
     print("\n\n\nRWAV protocol - {} plays first".format(family2.name))
-    demo(rwav_protocol.allocate, [family2, family1], "wxyz")
+    demo(rwav_protocol.allocate, [family2, family1], "vwxyz")
 

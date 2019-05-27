@@ -121,7 +121,7 @@ class ProportionalExceptC(FairnessCriterion):
     """
 
     def __init__(self, c:int, num_of_agents:int):
-        super().__init__("proportional({})-except-{}".format(num_of_agents,c), "PROP({}){}".format(num_of_agents,c))
+        super().__init__("proportional (for {} agents) except best {}".format(num_of_agents,c), "PROP-{}".format(c))
         self.c = c
         self.num_of_agents = num_of_agents
 
@@ -130,6 +130,20 @@ class ProportionalExceptC(FairnessCriterion):
 
     def is_fair_for(self, agent:Agent, own_bundle: set, all_bundles: list)->bool:
         return agent.is_PROPc(own_bundle, self.num_of_agents, self.c)
+
+
+class PropStar(ProportionalExceptC):
+    """
+    Returns the fairness criterion "PROP*" -
+    the agent's value should be at least 1/n times the value of
+    the set of all goods minus the (n-1) best goods.
+
+    >>> criterion=PropStar(num_of_agents=2)
+    >>> [criterion.target_value_for(r) for r in range(10)]
+    [0, 0, 1, 1, 2, 2, 3, 3, 4, 4]
+    """
+    def __init__(self, num_of_agents:int):
+        super().__init__(c=num_of_agents-1, num_of_agents=num_of_agents)
 
 
 
