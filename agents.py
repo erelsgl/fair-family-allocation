@@ -366,7 +366,7 @@ class BinaryAgent(Agent):
 
     >>> a = BinaryAgent({"x","y","z"})
     >>> a
-    1 agent  who want ['x', 'y', 'z']
+    1 binary agent  who want ['x', 'y', 'z']
     >>> a.value({"x","w"})
     1
     >>> a.value({"y","z"})
@@ -386,7 +386,7 @@ class BinaryAgent(Agent):
     >>> a.is_1_of_c_MMS({"w"}, c=2)
     False
     >>> BinaryAgent({"x","y","z"}, 2)
-    2 agents who want ['x', 'y', 'z']
+    2 binary agents who want ['x', 'y', 'z']
     """
 
     def __init__(self, desired_goods:set, cardinality:int=1):
@@ -432,7 +432,7 @@ class BinaryAgent(Agent):
         return math.floor(self.total_value / c)
 
     def __repr__(self):
-        return "{} agent{} who want {}".format(self.cardinality, plural(self.cardinality), sorted(self.desired_goods))
+        return "{} binary agent{} who want {}".format(self.cardinality, plural(self.cardinality), sorted(self.desired_goods))
 
 
 

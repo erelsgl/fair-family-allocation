@@ -16,8 +16,8 @@ class Family:
     >>> family1 = Family([BinaryAgent("xy",1), BinaryAgent("yz",2)], fairness_criteria.OneOfBestC(2), name="Family 1")
     >>> family1
     Family 1 seeks one-of-best-2 and has:
-     * 1 agent  who want ['x', 'y']
-     * 2 agents who want ['y', 'z']
+     * 1 binary agent  who want ['x', 'y']
+     * 2 binary agents who want ['y', 'z']
     >>> family1.num_of_members
     3
     >>> family1.num_of_happy_members(set("xw"),[set("yz")])
