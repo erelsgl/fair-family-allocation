@@ -37,6 +37,22 @@ class Agent(ABC):
         4
         """
 
+    def best_index(self, partition:list)->int:
+        """
+        Returns an index of a bundle that is most-valuable for the agent.
+        :param   partition: a list of k sets.
+        :return: an index in [0,..,k-1] that points to a bundle whose value for the agent is largest.
+        If there are two or more best bundles, the first index is returned.
+
+        >>> a = AdditiveAgent({"x": 1, "y": 2, "z": 3})
+        >>> a.best_index(["xy","z"])
+        0
+        >>> a.best_index(["y","xz"])
+        1
+        """
+        return max(range(len(partition)), key=lambda i:self.value(partition[i]))
+
+
     def value_except_best_c_goods(self, bundle:set, c:int=1)->int:
         """
         Calculates the value of the given bundle when the "best" (at most) c goods are removed from it.

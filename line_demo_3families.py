@@ -3,7 +3,7 @@
 """
 Demonstration of the line protocol.
 
-See: https://arxiv.org/abs/1709.02564 for details.
+See: https://arxiv.org/abs/1709.02564 Theorem 5.8 for details.
 """
 
 import line_protocol

@@ -1,7 +1,9 @@
 #!python3
 
 """
-The line-allocation (1/2-democratic EF1 for two families with general monotone agents).
+The line-allocation protocol:
+* 1/2-democratic EF1 for two families with general monotone agents;
+* 1/k-democratic fair for k families with additive agents.
 
 See: https://arxiv.org/abs/1709.02564 Theorems 4.2 and 5.8.
 """

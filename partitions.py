@@ -1,9 +1,9 @@
 #!python3
 
 """
-Utilities for generating all partitions.
+Utilities for generating partitions of a given subset.
 
-AUTHOR: alexis, https://stackoverflow.com/a/30134039/827927
+Basedd on code by alexis, https://stackoverflow.com/a/30134039/827927
 """
 
 

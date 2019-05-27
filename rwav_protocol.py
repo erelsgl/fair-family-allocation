@@ -75,14 +75,14 @@ def choose_good(family:Family, owned_goods:set, remaining_goods:set)->str:
     'z'
     """
     map_good_to_total_weight = defaultdict(int)
-    choose_good.trace("Calculating member weights:")
+    choose_good.trace("Member weights:")
     choose_good.trace(AGENT_WEIGHT_FORMAT.format("","Desired set","r","s","weight"))
     for member in family.members:
         current_member_weight           = member_weight(member, member.target_value, owned_goods, remaining_goods)
         for good in member.desired_goods:
             map_good_to_total_weight[good] += current_member_weight * member.cardinality
 
-    choose_good.trace("Calculating remaining good weights:")
+    choose_good.trace("Remaining good weights:")
     choose_good.trace(GOODS_WEIGHT_FORMAT.format("","Weight"))
     for good in remaining_goods:
         choose_good.trace(GOODS_WEIGHT_FORMAT.format(good, map_good_to_total_weight[good]))

@@ -17,8 +17,9 @@ def demo(algorithm, families, goods, *args):
     """
     for family in families:
         print(family)
-    bundles = algorithm(families, goods, *args)
+    allocation = algorithm(families, goods, *args)
     print("\nFinal allocation:")
     for index in range(len(families)):
-        print (" * ", families[index].allocation_description(bundles[index], bundles))
+        print (" * ", families[index].allocation_description(allocation[index], allocation))
+
 

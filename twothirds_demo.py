@@ -3,7 +3,7 @@
 """
 Demonstration of the two-thirds protocol.
 
-See: https://arxiv.org/abs/1709.02564 for details.
+See: https://arxiv.org/abs/1709.02564 Theorem 3.14 for details.
 """
 
 import twothirds_protocol, fairness_criteria
@@ -16,8 +16,6 @@ import copy
 def demo(family:Family, goods:set):
     family1 = copy.copy(family); family1.name="Group 1"
     family2 = copy.copy(family); family2.name="Group 2"
-    print(family1)
-    print(family2.name+" is identical.")
     utils.demo(twothirds_protocol.allocate, [family1, family2], goods)
 
 
