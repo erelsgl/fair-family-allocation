@@ -8,7 +8,7 @@ Classes that represent agents with general, additive and binary preferences.
 from abc import ABC, abstractmethod        # Abstract Base Class
 from utils import plural
 import math, itertools
-import more_itertools
+import partitions
 
 
 class Agent(ABC):
@@ -17,8 +17,14 @@ class Agent(ABC):
     Represents an agent or several agents with the same valuation function.
     """
 
-    def __init__(self, total_value:int, cardinality:int=1):
-        self.total_value = total_value
+    def __init__(self, desired_goods:set, cardinality:int=1):
+        """
+        :param desired_goods: the set of all goods that are desired by this agent/s.
+        :param cardinality: the number of agent/s with the same valuation function.
+        """
+        self.desired_goods_list = sorted(desired_goods)
+        self.desired_goods = set(desired_goods)
+        self.total_value = self.value(self.desired_goods)
         self.cardinality = cardinality
 
     @abstractmethod
@@ -73,29 +79,40 @@ class Agent(ABC):
             for sub_bundle in itertools.combinations(bundle, c)
         ])
 
-    def value_1_of_c_MMS(self, bundle:set, c:int=1)->int:
+
+    def values_1_of_c_partitions(self, c:int=1):
+        """
+        Generates the minimum values in all partitions to c bundles.
+
+        >>> a = AdditiveAgent({"x": 1, "y": 2, "z": 4, "w":0})
+        >>> sorted(a.values_1_of_c_partitions(c=2))
+        [1, 2, 3]
+
+        """
+        for partition in partitions.partitions_to_exactly_c(self.desired_goods_list, c):
+            yield min([self.value(bundle) for bundle in partition])
+
+
+    def value_1_of_c_MMS(self, c:int=1)->int:
         """
         Calculates the value of the 1-out-of-c maximin-share.
         This is a subroutine in checking whether an allocation is MMS.
 
         >>> a = MonotoneAgent({"x": 1, "y": 2, "xy": 4})
-        >>> a.value_1_of_c_MMS(set("xy"), c=1)
+        >>> a.value_1_of_c_MMS(c=1)
         4
-        >>> a.value_1_of_c_MMS(set("xy"), c=2)
+        >>> a.value_1_of_c_MMS(c=2)
         1
-        >>> a.value_1_of_c_MMS(set("xy"), c=3)
+        >>> a.value_1_of_c_MMS(c=3)
         0
+        >>> a = AdditiveAgent({"x": 1, "y": 2, "z": 4, "w":0})
+        >>> a.value_1_of_c_MMS(c=2)
+        3
         """
-        partition_values = []
-        for partition in more_itertools.partitions(bundle):
-            if len(partition) > c:
-                continue
-            elif len(partition) < c:
-                partition_value = 0
-            else:
-                partition_value = min([self.value(bundle) for bundle in partition])
-            partition_values.append(partition_value)
-        return max(partition_values)
+        if c > len(self.desired_goods):
+            return 0
+        else:
+            return max(self.values_1_of_c_partitions(c))
 
     def is_EFc(self, own_bundle: set, all_bundles: list, c: int) -> bool:
         """
@@ -170,8 +187,6 @@ class Agent(ABC):
         :param num_of_agents:  the total number of agents.
         :param c: how many best-goods to exclude from the total bundle.
         :return: True iff the current agent finds the allocation PROPc.
-
-        NOTE: requires the field self.desired_goods!
         """
         own_value = self.value(own_bundle)
         total_except_best_c = self.value_except_best_c_goods(
@@ -186,7 +201,7 @@ class MonotoneAgent(Agent):
 
     >>> a = MonotoneAgent({"x": 1, "y": 2, "xy": 4})
     >>> a
-    1 agent  with monotone valuations
+    1 agent  with monotone valuations. Desired goods: ['x', 'y']
     >>> a.value("")
     0
     >>> a.value({"x"})
@@ -202,7 +217,7 @@ class MonotoneAgent(Agent):
     >>> a.is_EFx({"x"}, [{"y"}])
     True
     >>> MonotoneAgent({"x": 1, "y": 2, "xy": 4}, cardinality=2)
-    2 agents with monotone valuations
+    2 agents with monotone valuations. Desired goods: ['x', 'y']
 
     """
     def __init__(self, map_bundle_to_value:dict, cardinality:int=1):
@@ -211,12 +226,10 @@ class MonotoneAgent(Agent):
         :param map_bundle_to_value: a dict that maps each subset of goods to its value.
         :param cardinality: the number of agents with the same valuation.
         """
-        total_value = max(map_bundle_to_value.values())
-            # The valuation is assumed to be monotone,
-            # so we assume that the total value is the maximum value.
-        Agent.__init__(self, total_value=total_value, cardinality=cardinality)
         self.map_bundle_to_value = {frozenset(bundle):value for bundle,value in  map_bundle_to_value.items()}
         self.map_bundle_to_value[frozenset()] = 0   # normalization: the value of the empty bundle is always 0
+        desired_goods = max(map_bundle_to_value.keys(), key=lambda k:map_bundle_to_value[k])
+        super().__init__(desired_goods, cardinality=cardinality)
 
     def value(self, goods:set)->int:
         """
@@ -229,7 +242,7 @@ class MonotoneAgent(Agent):
             raise ValueError("The value of {} is not specified in the valuation function".format(goods))
 
     def __repr__(self):
-        return "{} agent{} with monotone valuations".format(self.cardinality, plural(self.cardinality))
+        return "{} agent{} with monotone valuations. Desired goods: {}".format(self.cardinality, plural(self.cardinality), sorted(self.desired_goods))
 
 
 
@@ -240,7 +253,7 @@ class AdditiveAgent(Agent):
 
     >>> a = AdditiveAgent({"x": 1, "y": 2, "z": 4, "w":0})
     >>> a
-    1 agent  with additive valuations. Desired goods: ['x', 'y', 'z']
+    1 agent  with additive valuations: w=0 x=1 y=2 z=4
     >>> a.value(set())
     0
     >>> a.value({"w"})
@@ -265,8 +278,14 @@ class AdditiveAgent(Agent):
     False
     >>> a.is_EFx({"x"}, [{"y"}])
     True
+    >>> a.value_1_of_c_MMS(c=4)
+    0
+    >>> a.value_1_of_c_MMS(c=3)
+    1
+    >>> a.value_1_of_c_MMS(c=2)
+    3
     >>> AdditiveAgent({"x": 1, "y": 2, "z": 4}, cardinality=2)
-    2 agents with additive valuations. Desired goods: ['x', 'y', 'z']
+    2 agents with additive valuations: x=1 y=2 z=4
 
     """
     def __init__(self, map_good_to_value:dict, cardinality:int=1):
@@ -275,12 +294,9 @@ class AdditiveAgent(Agent):
         :param map_good_to_value: a dict that maps each single good to its value.
         :param cardinality: the number of agents with the same valuation.
         """
-        total_value = sum(map_good_to_value.values())
-            # The valuation is assumed to be additive,
-            # so we assume that the total value is the sum of all values.
-        super().__init__(total_value=total_value, cardinality=cardinality)
         self.map_good_to_value = map_good_to_value
-        self.desired_goods = set([g for g,v in map_good_to_value.items() if v>0])
+        desired_goods = set([g for g,v in map_good_to_value.items() if v>0])
+        super().__init__(desired_goods, cardinality=cardinality)
 
     def value(self, goods:set)->int:
         """
@@ -339,7 +355,8 @@ class AdditiveAgent(Agent):
         return self.value(sorted_bundle[c:])  # remove the worst c goods
 
     def __repr__(self):
-        return "{} agent{} with additive valuations. Desired goods: {}".format(self.cardinality, plural(self.cardinality), sorted(self.desired_goods))
+        vals = " ".join(["{}={}".format(k,v) for k,v in sorted(self.map_good_to_value.items())])
+        return "{} agent{} with additive valuations: {}".format(self.cardinality, plural(self.cardinality), vals)
 
 
 
@@ -378,8 +395,7 @@ class BinaryAgent(Agent):
         :param desired_goods: a set of strings - each string is a good.
         :param cardinality: the number of agents with the same set of desired goods.
         """
-        super().__init__(total_value=len(desired_goods), cardinality=cardinality)
-        self.desired_goods = set(desired_goods)
+        super().__init__(desired_goods, cardinality=cardinality)
 
     def value(self, goods:set)->int:
         """
