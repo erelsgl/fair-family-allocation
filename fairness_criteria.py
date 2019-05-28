@@ -25,28 +25,38 @@ class FairnessCriterion(ABC):
         self.abbreviation = abbreviation
 
     @abstractmethod
-    def is_fair_for(agent:Agent, own_bundle: set, all_bundles: list)->bool:
+    def target_value_for_agent(self, agent:Agent)->int:
         """
-        :param agent:       An agent in some family.
-        :param own_bundle:  The bundle allocated to the agent's family.
-        :param all_bundles: The list of bundles allocated to all families (a list of sets).
-        :return: True iff the agent finds the allocation fair, according to the fairness criterion.
+        :param agent:   an Agent object.
+        :return: The value that this agent should get in order to satisfy the fairness criterion.
         """
 
     @abstractmethod
-    def target_value_for(total_value: int)->int:
+    def target_value_for_binary(self, total_value: int)->int:
         """
         :param total_value:   The total value of all goods, in the eyes of a particular agent.
         :return: The value that this agent should get in order to satisfy the fairness criterion.
         Relevant mainly for binary instances.
         """
 
+    def is_fair_for(self, agent:Agent, own_bundle: set, all_bundles: list)->bool:
+        """
+        The default fairness calculation - checks if the bundle's value is above the agent's target value.
+        Relevant for fairness criteria that ignore the other bundles, e.g. proportionality or MMS.
+        :param agent:       An agent in some family.
+        :param own_bundle:  The bundle allocated to the agent's family.
+        :param all_bundles: The list of bundles allocated to all families (a list of sets).
+        :return: True iff the agent finds the allocation fair, according to the fairness criterion.
+        """
+        return agent.value(own_bundle) >= self.target_value_for_agent(agent)
+
+
 class OneOfBestC(FairnessCriterion):
     """
     Returns the fairness criterion "1 out of best c".
 
     >>> criterion=OneOfBestC(3)
-    >>> [criterion.target_value_for(r) for r in range(10)]
+    >>> [criterion.target_value_for_binary(r) for r in range(10)]
     [0, 0, 0, 1, 1, 1, 1, 1, 1, 1]
     """
 
@@ -54,11 +64,11 @@ class OneOfBestC(FairnessCriterion):
         super().__init__("one-of-best-{}".format(c), "1-of-best-{}".format(c))
         self.c = c
 
-    def target_value_for(self, total_value: int)->int:
-        return 1 if total_value >= self.c else 0
+    def target_value_for_agent(self, agent: Agent)->int:
+        return agent.value_of_cth_best_good(self.c)
 
-    def is_fair_for(self, agent:Agent, own_bundle: set, all_bundles: list)->bool:
-        return agent.value(own_bundle) >= self.target_value_for(agent.total_value)
+    def target_value_for_binary(self, total_value: int)->int:
+        return 1 if total_value >= self.c else 0
 
 
 class MaximinShareOneOfC(FairnessCriterion):
@@ -66,7 +76,7 @@ class MaximinShareOneOfC(FairnessCriterion):
     Returns the fairness criterion "1 of c maximin-share".
 
     >>> criterion=MaximinShareOneOfC(3)
-    >>> [criterion.target_value_for(r) for r in range(10)]
+    >>> [criterion.target_value_for_binary(r) for r in range(10)]
     [0, 0, 0, 1, 1, 1, 2, 2, 2, 3]
     """
 
@@ -81,11 +91,11 @@ class MaximinShareOneOfC(FairnessCriterion):
         self.c = c
         self.approximation_factor = approximation_factor
 
-    def target_value_for(self, total_value: int)->int:
-        return math.floor(total_value/self.c)
+    def target_value_for_agent(self, agent: Agent)->int:
+        return agent.value_1_of_c_MMS(c=self.c, approximation_factor=self.approximation_factor)
 
-    def is_fair_for(self, agent:Agent, own_bundle: set, all_bundles: list)->bool:
-        return agent.is_1_of_c_MMS(own_bundle, self.c, self.approximation_factor)
+    def target_value_for_binary(self, total_value: int)->int:
+        return math.floor(total_value/self.c)*self.approximation_factor
 
 
 class EnvyFreeExceptC(FairnessCriterion):
@@ -94,7 +104,7 @@ class EnvyFreeExceptC(FairnessCriterion):
     Currently, only c=1 is supported.
 
     >>> criterion=EnvyFreeExceptC(1)
-    >>> [criterion.target_value_for(r) for r in range(10)]
+    >>> [criterion.target_value_for_binary(r) for r in range(10)]
     [0, 0, 1, 1, 2, 2, 3, 3, 4, 4]
     """
 
@@ -102,8 +112,11 @@ class EnvyFreeExceptC(FairnessCriterion):
         super().__init__("envy-free-except-{}".format(c), "EF{}".format(c))
         self.c = c
 
-    def target_value_for(self, total_value: int)->int:
-        return max(0, math.floor((total_value - self.c + 1)/2))
+    def target_value_for_agent(self, agent: Agent)->int:
+        raise ValueError("target value is not relevant for envy-freeness concepts")
+
+    def target_value_for_binary(self, total_value: int)->int:
+        raise ValueError("target value is not relevant for envy-freeness concepts")
 
     def is_fair_for(self, agent:Agent, own_bundle: set, all_bundles: list)->bool:
         return agent.is_EFc(own_bundle, all_bundles, self.c)
@@ -115,35 +128,21 @@ class ProportionalExceptC(FairnessCriterion):
     the agent's value should be at least 1/n times the value of
     the set of all goods minus the c best goods.
 
-    >>> criterion=ProportionalExceptC(c=1, num_of_agents=2)
-    >>> [criterion.target_value_for(r) for r in range(10)]
+    >>> criterion=ProportionalExceptC(num_of_agents=2, c=1)
+    >>> [criterion.target_value_for_binary(r) for r in range(10)]
     [0, 0, 1, 1, 2, 2, 3, 3, 4, 4]
     """
 
-    def __init__(self, c:int, num_of_agents:int):
+    def __init__(self, num_of_agents:int, c:int):
         super().__init__("proportionality-except-{}".format(c), "PROP-{}".format(c))
         self.c = c
         self.num_of_agents = num_of_agents
 
-    def target_value_for(self, total_value: int)->int:
+    def target_value_for_agent(self, agent: Agent)->int:
+        return agent.value_proportional_except_c(num_of_agents=self.num_of_agents, c=self.c)
+
+    def target_value_for_binary(self, total_value: int)->int:
         return max(0, math.ceil((total_value - self.c)/self.num_of_agents))
-
-    def is_fair_for(self, agent:Agent, own_bundle: set, all_bundles: list)->bool:
-        return agent.is_PROPc(own_bundle, self.num_of_agents, self.c)
-
-
-class PropStar(ProportionalExceptC):
-    """
-    Returns the fairness criterion "PROP*" -
-    the agent's value should be at least 1/n times the value of
-    the set of all goods minus the (n-1) best goods.
-
-    >>> criterion=PropStar(num_of_agents=2)
-    >>> [criterion.target_value_for(r) for r in range(10)]
-    [0, 0, 1, 1, 2, 2, 3, 3, 4, 4]
-    """
-    def __init__(self, num_of_agents:int):
-        super().__init__(c=num_of_agents-1, num_of_agents=num_of_agents)
 
 
 

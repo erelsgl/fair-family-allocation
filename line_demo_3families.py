@@ -21,7 +21,7 @@ if __name__ == "__main__":
     goods = "uvwxyz"
     u='u'; v='v'; w='w'; x='x'; y='y'; z='z'
     k = 3 # num of families
-    PropStar =  fairness_criteria.ProportionalExceptC(c=k-1,num_of_agents=k)
+    PropStar =  fairness_criteria.ProportionalExceptC(num_of_agents=k, c=k-1)
     family1 = Family([
         AdditiveAgent({u:1, v:1,w:2,x:4,y:8,z:16}, 7),
         AdditiveAgent({u:16, v:16,w:8,x:4,y:2,z:1}, 2)],

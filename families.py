@@ -36,7 +36,7 @@ class Family:
         self.name = name
         self.num_of_members = sum([member.cardinality for member in self.members])
         for member in self.members:
-            member.target_value = self.fairness_criterion.target_value_for(member.total_value)
+            member.target_value = self.fairness_criterion.target_value_for_binary(member.total_value)
 
     def num_of_members_with(self, predicate)->int:
         """

@@ -9,6 +9,7 @@ from abc import ABC, abstractmethod        # Abstract Base Class
 from utils import plural
 import math, itertools
 import partitions
+from fractions import  Fraction
 
 
 class Agent(ABC):
@@ -109,10 +110,10 @@ class Agent(ABC):
             yield min([self.value(bundle) for bundle in partition])
 
 
-    def value_1_of_c_MMS(self, c:int=1)->int:
+    def value_1_of_c_MMS(self, c:int=1, approximation_factor:float=1)->int:
         """
         Calculates the value of the 1-out-of-c maximin-share.
-        This is a subroutine in checking whether an allocation is MMS.
+        This is a subroutine in checking whether an allocation is MMS-fair.
 
         >>> a = MonotoneAgent({"x": 1, "y": 2, "xy": 4})
         >>> a.value_1_of_c_MMS(c=1)
@@ -128,7 +129,14 @@ class Agent(ABC):
         if c > len(self.desired_goods):
             return 0
         else:
-            return max(self.values_1_of_c_partitions(c))
+            return max(self.values_1_of_c_partitions(c))*approximation_factor
+
+    def value_proportional_except_c(self, num_of_agents:int, c:int):
+        """
+        Calculates the proportional value of that agent, when the c most valuable goods are ignored.
+        This is a subroutine in checking whether an allocation is PROPc.
+        """
+        return Fraction(self.value_except_best_c_goods(self.desired_goods, c) , num_of_agents)
 
     def is_EFc(self, own_bundle: set, all_bundles: list, c: int) -> bool:
         """
@@ -179,19 +187,7 @@ class Agent(ABC):
         return True
 
     def is_1_of_c_MMS(self, own_bundle:set, c:int, approximation_factor:float=1)->bool:
-        own_value = self.value(own_bundle)
-        target_value = approximation_factor * self.value_1_of_c_MMS(c)
-        return own_value >= target_value
-
-    def is_PROP(self, own_bundle:set, num_of_agents:int)->bool:
-        """
-        Checks whether the current agent finds the given allocation proportional.
-        :param own_bundle:     the bundle consumed by the current agent.
-        :param num_of_agents:  the total number of agents.
-        :return: True iff the current agent finds the allocation PROPc.
-        """
-        own_value = self.value(own_bundle)
-        return own_value*num_of_agents >= self.total_value
+        return self.value(own_bundle) >= self.value_1_of_c_MMS(c, approximation_factor)
 
     def is_PROPc(self, own_bundle:set, num_of_agents:int, c:int)->bool:
         """
@@ -204,10 +200,16 @@ class Agent(ABC):
         :param c: how many best-goods to exclude from the total bundle.
         :return: True iff the current agent finds the allocation PROPc.
         """
-        own_value = self.value(own_bundle)
-        total_except_best_c = self.value_except_best_c_goods(
-            self.desired_goods, c=num_of_agents-1)
-        return own_value*num_of_agents >= total_except_best_c
+        return self.value(own_bundle) >= self.value_proportional_except_c(num_of_agents, c)
+
+    def is_PROP(self, own_bundle:set, num_of_agents:int)->bool:
+        """
+        Checks whether the current agent finds the given allocation proportional.
+        :param own_bundle:     the bundle consumed by the current agent.
+        :param num_of_agents:  the total number of agents.
+        :return: True iff the current agent finds the allocation PROPc.
+        """
+        return self.is_PROPc(own_bundle, num_of_agents, c=0)
 
 
 
@@ -370,6 +372,27 @@ class AdditiveAgent(Agent):
         sorted_bundle = sorted(bundle, key=lambda g: self.map_good_to_value[g])  # sort the goods from worst to best:
         return self.value(sorted_bundle[c:])  # remove the worst c goods
 
+
+    def value_of_cth_best_good(self, c:int)->int:
+        """
+        Return the value of the agent's c-th most valuable good.
+
+        >>> a = AdditiveAgent({"x": 1, "y": 2, "z": 4})
+        >>> a.value_of_cth_best_good(1)
+        4
+        >>> a.value_of_cth_best_good(2)
+        2
+        >>> a.value_of_cth_best_good(3)
+        1
+        >>> a.value_of_cth_best_good(4)
+        0
+        """
+        if c > len(self.desired_goods):
+            return 0
+        else:
+            sorted_values = sorted(self.map_good_to_value.values(), reverse=True)
+            return sorted_values[c-1]
+
     def __repr__(self):
         vals = " ".join(["{}={}".format(k,v) for k,v in sorted(self.map_good_to_value.items())])
         return "{} agent{} with additive valuations: {}".format(self.cardinality, plural(self.cardinality), vals)
@@ -444,7 +467,10 @@ class BinaryAgent(Agent):
         if len(bundle) <= c: return 0
         return self.value(bundle) - c
 
-    def value_1_of_c_MMS(self, c:int=1)->int:
+    def value_of_cth_best_good(self, c:int)->int:
+        return 1 if self.total_value >= c else 0
+
+    def value_1_of_c_MMS(self, c:int=1, approximation_factor:float=1)->int:
         return math.floor(self.total_value / c)
 
     def __repr__(self):
