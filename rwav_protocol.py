@@ -1,9 +1,9 @@
 #!python3
 
 """
-RWAV protocol - Round-Robin with Approval Voting (for two binary families)
+RWAV protocol - Round-Robin with Approval Voting (for families with binary agents)
 
-See: https://arxiv.org/abs/1709.02564 subsection 3.2.1 for details.
+See: https://arxiv.org/abs/1709.02564 subsections 3.2 and 5.4 for details.
 """
 
 from functools import lru_cache
@@ -19,7 +19,6 @@ trace = lambda *x: None  # To enable tracing, set trace=print
 def allocate(families:list, goods: set)->list:
     """
     Run the RWAV protocol (Round Robin with Weighted Voting) on the given families.
-    Currently only 2 families are supported.
     :return a list of bundles - a bundle per family.
 
     >>> fairness_1_of_best_2 = fairness_criteria.OneOfBestC(2)
@@ -31,9 +30,7 @@ def allocate(families:list, goods: set)->list:
     >>> sorted(bundle2)
     ['w', 'y']
     """
-    n_families = len(families)
-    if n_families!=2:
-        raise("Currently only 2 families are supported")
+    num_of_families = len(families)
 
     remaining_goods=set(goods)
     bundles = [set() for f in families]
@@ -44,14 +41,13 @@ def allocate(families:list, goods: set)->list:
         current_family = families[family_index]
         current_family_bundle = bundles[family_index]
         trace("\nTurn #{}: {}'s turn to pick a good from {}:".format(turn_index + 1, current_family.name, sorted(remaining_goods)))
-        g = choose_good(current_family, current_family_bundle, remaining_goods)
+        g = choose_good(current_family, current_family_bundle, remaining_goods, num_of_families)
         trace("{} picks {}".format(current_family.name, g))
         current_family_bundle.add(g)
         remaining_goods.remove(g)
         turn_index += 1
-        family_index = (family_index + 1) % n_families
+        family_index = (family_index + 1) % num_of_families
     return bundles
-trace = lambda *x: None  # To enable tracing, set trace=print
 
 
 
@@ -62,7 +58,7 @@ GOODS_WEIGHT_FORMAT = "{0: <6}{1: <9}"
 
 
 
-def choose_good(family:Family, owned_goods:set, remaining_goods:set)->str:
+def choose_good(family:Family, owned_goods:set, remaining_goods:set, num_of_families:int=2)->str:
     """
     Calculate the good that the family chooses from the set of remaining goods.
     It uses weighted-approval-voting.
@@ -78,7 +74,7 @@ def choose_good(family:Family, owned_goods:set, remaining_goods:set)->str:
     choose_good.trace("Member weights:")
     choose_good.trace(AGENT_WEIGHT_FORMAT.format("","Desired set","r","s","weight"))
     for member in family.members:
-        current_member_weight           = member_weight(member, member.target_value, owned_goods, remaining_goods)
+        current_member_weight           = member_weight(member, member.target_value, owned_goods, remaining_goods, num_of_families)
         for good in member.desired_goods:
             map_good_to_total_weight[good] += current_member_weight * member.cardinality
 
@@ -90,7 +86,7 @@ def choose_good(family:Family, owned_goods:set, remaining_goods:set)->str:
 choose_good.trace = lambda *x: None  # To enable tracing, set choose_good.trace=print
 
 
-def member_weight(member: BinaryAgent, target_value: int, owned_goods: set, remaining_goods: set) -> float:
+def member_weight(member: BinaryAgent, target_value: int, owned_goods: set, remaining_goods: set, num_of_families:int=2) -> float:
     """
     Calculate the voting-weight of the given member with the given owned goods and remaining goods.
 
@@ -104,7 +100,7 @@ def member_weight(member: BinaryAgent, target_value: int, owned_goods: set, rema
     member_remaining_value = member.value(remaining_goods)  # the "r" of the member
     member_current_value = member.value(owned_goods)
     member_should_get_value = target_value - member_current_value  # the "s" of the member
-    the_member_weight = weight(member_remaining_value, member_should_get_value)
+    the_member_weight = weight(member_remaining_value, member_should_get_value, num_of_families)
     members_string = "{} member{}".format(member.cardinality, plural(member.cardinality))
     desired_goods_string = ",".join(sorted(member.desired_goods))
     member_weight.trace(AGENT_WEIGHT_FORMAT.format(
@@ -117,9 +113,9 @@ member_weight.trace = lambda *x: None  # To enable tracing, set member_weight.tr
 
 
 @lru_cache(maxsize=None)
-def balance(r:int, s:int)->float:
+def balance(r:int, s:int, k:int=2)->float:
     """
-    Calculates the function B(r,s), which represents
+    Calculates the function B_k(r,s), which represents
        the balance of a user with r remaining goods and s missing goods.
     Uses the recurrence relation in https://arxiv.org/abs/1709.02564 .
 
@@ -137,15 +133,30 @@ def balance(r:int, s:int)->float:
     1
     >>> balance(-1,1)
     0
+    >>> balance(5,0,k=3)
+    1
+    >>> balance(0,1,k=3)
+    0
     """
-    if (s<=0): return 1
-    if (s>r): return 0
-    val1 = (balance(r-1,s)+balance(r-1,s-1))/2
-    val2 = balance(r-2,s-1)
-    return min(val1,val2)
+    if (s<=0):
+        return 1
+    if (s>r):
+        return 0
+    if k==2:
+        val1 = (balance(r-1,s)+balance(r-1,s-1))/2
+        val2 = balance(r-2,s-1)
+        return min(val1,val2)
+    elif k>2:
+        if s>1:
+            raise(ValueError("When there are more than 2 families, we do not know how to calculate weights for members with s>1"))
+        elif s==1:
+            Lk = math.pow(2,1/(k-1))
+            return 1 - 1/math.pow(Lk,r)
+    raise(ValueError("Illegal values: r={} s={} k={}").format(r,s,k))
+
 
 @lru_cache(maxsize=None)
-def weight(r:int, s:int)->float:
+def weight(r:int, s:int, k:int)->float:
     """
     Calculates the function w(r,s), which represents
        the voting weight of a user with r remaining goods and s missing goods.
@@ -162,8 +173,12 @@ def weight(r:int, s:int)->float:
     0.0
     >>> float(weight(4,-2))
     0.0
+    >>> weight(5,0,k=3)
+    0.0
+    >>> weight(0,1,k=3)
+    0.0
     """
-    return balance(r,s)-balance(r-1,s)
+    return balance(r, s, k) - balance(r - 1, s, k)
 
 
 if __name__ == "__main__":

@@ -1,9 +1,9 @@
 #!python3
 
 """
-Demonstration of the RWAV protocol - Round-Robin with Approval Voting.
+Demonstration of the RWAV protocol - Round-Robin with Approval Voting - for two families.
 
-See: https://arxiv.org/abs/1709.02564 for details.
+See: https://arxiv.org/abs/1709.02564 subsection 3.2 for details.
 """
 
 import fairness_criteria, rwav_protocol

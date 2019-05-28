@@ -2,14 +2,14 @@
 
 """
 Utilities for generating partitions of a given subset.
-
-Basedd on code by alexis, https://stackoverflow.com/a/30134039/827927
 """
 
+import itertools
 
 def partitions(collection:set):
     """
     Generates all partitions of the given set.
+    Based on code by alexis, https://stackoverflow.com/a/30134039/827927
 
     >>> list(partitions([1,2,3]))
     [[[1, 2, 3]], [[1], [2, 3]], [[1, 2], [3]], [[2], [1, 3]], [[1], [2], [3]]]
@@ -57,6 +57,17 @@ def partitions_to_exactly_c(collection: set, c: int):
         if len(p)==c:
             yield p
 
+
+def powerset(iterable):
+    """
+    Returns all subsets of the given iterable.
+    Based on code from https://docs.python.org/3.7/library/itertools.html .
+
+    >>> list(powerset([1,2,3]))
+    [(), (1,), (2,), (3,), (1, 2), (1, 3), (2, 3), (1, 2, 3)]
+    """
+    s = list(iterable)
+    return itertools.chain.from_iterable(itertools.combinations(s, r) for r in range(len(s)+1))
 
 if __name__ == "__main__":
     import doctest
