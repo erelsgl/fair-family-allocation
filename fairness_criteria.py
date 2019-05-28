@@ -121,7 +121,7 @@ class ProportionalExceptC(FairnessCriterion):
     """
 
     def __init__(self, c:int, num_of_agents:int):
-        super().__init__("proportional (for {} agents) except best {}".format(num_of_agents,c), "PROP-{}".format(c))
+        super().__init__("proportionality-except-{}".format(c), "PROP-{}".format(c))
         self.c = c
         self.num_of_agents = num_of_agents
 

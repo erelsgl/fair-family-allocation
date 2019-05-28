@@ -1,9 +1,12 @@
 #!python3
 
 """
-A partial implementation of the plurality-protocol for k families\ with monotone valuations.
+A partial implementation of the plurality-protocol for k families with monotone valuations.
 
 See: https://arxiv.org/abs/1709.02564 Theorem 5.5 for details.
+
+NOTE: the current partial implementation does not include the search for the fully-labeled subsimplex;
+it includes only the construction of the final allocation from that subsimplex.
 """
 
 from agents import *

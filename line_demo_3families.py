@@ -1,7 +1,7 @@
 #!python3
 
 """
-Demonstration of the line protocol.
+Demonstration of the line-allocation protocol for three families.
 
 See: https://arxiv.org/abs/1709.02564 Theorem 5.8 for details.
 """
@@ -21,19 +21,19 @@ if __name__ == "__main__":
     goods = "uvwxyz"
     u='u'; v='v'; w='w'; x='x'; y='y'; z='z'
     k = 3 # num of families
-
+    PropStar =  fairness_criteria.ProportionalExceptC(c=k-1,num_of_agents=k)
     family1 = Family([
         AdditiveAgent({u:1, v:1,w:2,x:4,y:8,z:16}, 7),
         AdditiveAgent({u:16, v:16,w:8,x:4,y:2,z:1}, 2)],
-        fairness_criteria.MaximinShareOneOfC(c=2*k-1), name="Group 1")
+        PropStar, name="Group 1")
     family2 = Family([
         AdditiveAgent({u:1, v:1,w:1,x:3,y:3,z:4}, 5),
         AdditiveAgent({u:4, v:4,w:3,x:1,y:3,z:1}, 1)],
-        fairness_criteria.MaximinShareOneOfC(c=k, approximation_factor=Fraction(1,k)), name="Group 2")
+        PropStar, name="Group 2")
     family3 = Family([
         AdditiveAgent({u:1, v:1,w:1,x:2,y:3,z:3}, 9),
         AdditiveAgent({u:3, v:3,w:3,x:2,y:1,z:1}, 3)],
-        fairness_criteria.PropStar(num_of_agents=k), name="Group 3")
+        PropStar, name="Group 3")
 
     print("\n\n\ndemocratic-fair allocation among three groups:")
     demo(line_protocol.allocate, [family1, family2, family3], goods)
