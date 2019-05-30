@@ -30,8 +30,13 @@ def allocate(families:list, goods: set)->list:
     >>> sorted(bundle2)
     ['w', 'y']
     """
-    num_of_families = len(families)
+    # Calculate target value for each member in each family:
+    for family in families:
+        for member in family.members:
+            member.target_value = family.fairness_criterion.target_value_for_binary(member.total_value)
 
+
+    num_of_families = len(families)
     remaining_goods=set(goods)
     bundles = [set() for f in families]
 
@@ -67,6 +72,7 @@ def choose_good(family:Family, owned_goods:set, remaining_goods:set, num_of_fami
     >>> agent2 = BinaryAgent({"z","w"})
     >>> fairness_1_of_best_2 = fairness_criteria.OneOfBestC(2)
     >>> family = Family([agent1,agent2], fairness_criterion=fairness_1_of_best_2, name="Family 1")
+    >>> agent1.target_value = agent2.target_value = 1
     >>> choose_good(family, set(), {"x","y","z"})
     'z'
     """
@@ -156,7 +162,7 @@ def balance(r:int, s:int, k:int=2)->float:
 
 
 @lru_cache(maxsize=None)
-def weight(r:int, s:int, k:int)->float:
+def weight(r:int, s:int, k:int=2)->float:
     """
     Calculates the function w(r,s), which represents
        the voting weight of a user with r remaining goods and s missing goods.
@@ -174,9 +180,9 @@ def weight(r:int, s:int, k:int)->float:
     >>> float(weight(4,-2))
     0.0
     >>> weight(5,0,k=3)
-    0.0
+    0
     >>> weight(0,1,k=3)
-    0.0
+    0
     """
     return balance(r, s, k) - balance(r - 1, s, k)
 

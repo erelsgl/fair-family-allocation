@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!bash
 # Run all the doctests in this folder
 
 for file in *.py

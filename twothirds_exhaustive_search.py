@@ -94,5 +94,5 @@ if __name__ == "__main__":
     # check_conjecture_for("xyz")
     # check_conjecture_for("wxyz")
     # check_conjecture_for("vwxyz")
-    check_conjecture_for("uvwxyz")
+    # check_conjecture_for("uvwxyz")
 

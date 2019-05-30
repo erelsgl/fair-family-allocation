@@ -32,9 +32,9 @@ def allocate(families:list, goods:list)->list:
        In other cases, the algorithm behavior is undefined.
 
 
-    >>> fairness_EF1 = fairness_criteria.EnvyFreeExceptC(1)
-    >>> family1 = Family([BinaryAgent({"w","x"},1),BinaryAgent({"x","y"},2),BinaryAgent({"y","z"},3), BinaryAgent({"z","w"},4)], fairness_criterion=fairness_EF1, name="Family 1")
-    >>> family2 = Family([BinaryAgent({"w","z"},2),BinaryAgent({"z","y"},3)], fairness_criterion=fairness_EF1, name="Family 2")
+    >>> fairness_PROP1 = fairness_criteria.ProportionalExceptC(num_of_agents=2,c=1)
+    >>> family1 = Family([BinaryAgent({"w","x"},1),BinaryAgent({"x","y"},2),BinaryAgent({"y","z"},3), BinaryAgent({"z","w"},4)], fairness_criterion=fairness_PROP1, name="Family 1")
+    >>> family2 = Family([BinaryAgent({"w","z"},2),BinaryAgent({"z","y"},3)], fairness_criterion=fairness_PROP1, name="Family 2")
     >>> (bundle1,bundle2) = allocate([family1, family2], ["w","x","y","z"])
     >>> sorted(bundle1)
     ['w']

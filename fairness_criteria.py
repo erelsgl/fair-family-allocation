@@ -102,10 +102,6 @@ class EnvyFreeExceptC(FairnessCriterion):
     """
     Returns the fairness criterion "EFc" (envy-free except c goods).
     Currently, only c=1 is supported.
-
-    >>> criterion=EnvyFreeExceptC(1)
-    >>> [criterion.target_value_for_binary(r) for r in range(10)]
-    [0, 0, 1, 1, 2, 2, 3, 3, 4, 4]
     """
 
     def __init__(self, c:int):
