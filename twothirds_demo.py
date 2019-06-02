@@ -17,6 +17,7 @@ def demo(family:Family, goods:set):
     family1 = copy.copy(family); family1.name="Group 1"
     family2 = copy.copy(family); family2.name="Group 2"
     utils.demo(twothirds_protocol.allocate, [family1, family2], goods)
+    print("\n")
 
 
 
