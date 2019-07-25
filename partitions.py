@@ -28,7 +28,7 @@ def partitions(collection:set):
 
 def partitions_to_at_most_c(collection:list, c:int):
     """
-    Generates all partitions of the given set whose size is at most c.
+    Generates all partitions of the given set whose size is at most c subsets.
 
     >>> list(partitions_to_at_most_c([1,2,3], 2))
     [[[1, 2, 3]], [[1], [2, 3]], [[1, 2], [3]], [[2], [1, 3]]]
@@ -48,7 +48,7 @@ def partitions_to_at_most_c(collection:list, c:int):
 
 def partitions_to_exactly_c(collection: set, c: int):
     """
-    Generates all partitions of the given set whose size is exactly c.
+    Generates all partitions of the given set whose size is exactly c subsets.
 
     >>> list(partitions_to_exactly_c([1,2,3], 2))
     [[[1], [2, 3]], [[1, 2], [3]], [[2], [1, 3]]]

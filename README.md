@@ -1,5 +1,5 @@
 # family-fair-allocation
-Algorithms for democratic fair allocation of items among families and other groups.
+Algorithms for democratic fair allocation of indivisible items among families and other groups.
 
 To demonstrate a protocol from [this paper](https://arxiv.org/abs/1709.02564),
 run one of the following:

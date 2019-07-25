@@ -99,7 +99,7 @@ class Agent(ABC):
 
     def values_1_of_c_partitions(self, c:int=1):
         """
-        Generates the minimum values in all partitions to c bundles.
+        Generates the minimum values in all partitions into c bundles.
 
         >>> a = AdditiveAgent({"x": 1, "y": 2, "z": 4, "w":0})
         >>> sorted(a.values_1_of_c_partitions(c=2))
