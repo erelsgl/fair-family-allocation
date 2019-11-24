@@ -6,16 +6,15 @@ Demonstration of the line-allocation protocol for three families.
 See: https://arxiv.org/abs/1709.02564 Theorem 5.8 for details.
 """
 
-import line_protocol
+import line_protocol, logging
 from agents import *
 from families import Family
 from utils import demo
 import fairness_criteria
-from fractions import Fraction
 
 
 if __name__ == "__main__":
-    line_protocol.trace = print
+    line_protocol.logger.setLevel(logging.INFO)
 
     # Define fairness criteria:
     goods = "uvwxyz"

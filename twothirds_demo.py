@@ -6,7 +6,7 @@ Demonstration of the two-thirds protocol.
 See: https://arxiv.org/abs/1709.02564 Theorem 3.14 for details.
 """
 
-import twothirds_protocol, fairness_criteria
+import twothirds_protocol, fairness_criteria, logging
 from agents import BinaryAgent
 from families import Family
 import utils
@@ -22,7 +22,7 @@ def demo(family:Family, goods:set):
 
 
 if __name__ == "__main__":
-    twothirds_protocol.trace = print
+    twothirds_protocol.logger.setLevel(logging.INFO)
 
     # Define fairness criteria:
     fairness_1_of_best_2 = fairness_criteria.OneOfBestC(2)

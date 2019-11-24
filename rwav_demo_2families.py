@@ -6,15 +6,16 @@ Demonstration of the RWAV protocol - Round-Robin with Approval Voting - for two 
 See: https://arxiv.org/abs/1709.02564 subsection 3.2 for details.
 """
 
-import fairness_criteria, rwav_protocol
+import fairness_criteria, rwav_protocol, logging
 from agents import BinaryAgent
 from families import Family
 from utils import demo
 
 if __name__ == "__main__":
-    rwav_protocol.trace = print
-    rwav_protocol.choose_good.trace = print
-    rwav_protocol.member_weight.trace = print
+    rwav_protocol.logger.setLevel(logging.INFO)
+    rwav_protocol.choose_good.logger.setLevel(logging.INFO)
+    rwav_protocol.member_weight.logger.setLevel(logging.INFO)
+
 
     # define fairness criteria:
     fairness_1_of_2_mms  = fairness_criteria.MaximinShareOneOfC(2)

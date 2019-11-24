@@ -11,7 +11,10 @@ from agents import *
 from families import *
 import rwav_protocol
 
-trace = lambda *x: None  # To enable tracing, set trace=print
+import logging, sys
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.StreamHandler(sys.stdout))
+# To enable tracing, logger.setLevel(logging.INFO)
 
 def allocate(families:list, goods: set, threshold: float):
     """
@@ -47,13 +50,13 @@ def allocate(families:list, goods: set, threshold: float):
         if nums[0] >= thresholds[0]:
             bundle1 = set(g)
             bundle2 = goods.difference(bundle1)
-            trace("{} out of {} members in {} want {}, so group 1 gets {} and group 2 gets the rest".format(
+            logger.info("{} out of {} members in {} want {}, so group 1 gets {} and group 2 gets the rest".format(
                 nums[0],     families[0].num_of_members,     families[0].name, g,                  g))
             return (bundle1,bundle2)
         elif nums[1] >= thresholds[1]:
             bundle2 = set(g)
             bundle1 = goods.difference(bundle2)
-            trace("{} out of {} members in {} want {}, so group 2 gets {} and group 1 gets the rest".format(
+            logger.info("{} out of {} members in {} want {}, so group 2 gets {} and group 1 gets the rest".format(
                 nums[1],     families[1].num_of_members,     families[1].name, g,                  g))
             return (bundle1,bundle2)
     return rwav_protocol.allocate(families, goods)

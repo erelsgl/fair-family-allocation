@@ -9,7 +9,6 @@ from agents import *
 import fairness_criteria
 from fairness_criteria import FairnessCriterion
 
-trace = lambda *x: None  # To enable tracing, set trace=print
 
 class Family:
     """

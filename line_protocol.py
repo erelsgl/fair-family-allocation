@@ -13,7 +13,10 @@ from families import Family
 import fairness_criteria
 
 
-trace = lambda *x: None  # To enable tracing, set trace=print
+import logging, sys
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.StreamHandler(sys.stdout))
+# To enable tracing, logger.setLevel(logging.INFO)
 
 
 def allocate(families:list, goods:list)->list:
@@ -50,23 +53,23 @@ def allocate(families:list, goods:list)->list:
 
     if k==1:
         family = families[0]
-        trace("   {} gets the remaining bundle".format(family.name))
+        logger.info("   {} gets the remaining bundle".format(family.name))
         return [set(goods)]
 
     goods=list(goods)  # order the goods on a line
     left_sequence = list()
     right_sequence = list(goods)
     for good in goods:
-        trace("\nCurrent partition:  {} | {}:".format(left_sequence,right_sequence))
+        logger.info("\nCurrent partition:  {} | {}:".format(left_sequence,right_sequence))
         left_bundle = set(left_sequence)
         right_bundle = set(right_sequence)
         for family_index in range(len(families)):
             family = families[family_index]
             num_of_happy_members = family.num_of_happy_members(left_bundle, [right_bundle])
-            trace("   {}: {}/{} members think the left bundle is {}".format(
+            logger.info("   {}: {}/{} members think the left bundle is {}".format(
                 family.name, num_of_happy_members, family.num_of_members, family.fairness_criterion.abbreviation))
             if num_of_happy_members*k >= family.num_of_members:
-                trace("   {} gets the left bundle".format(family.name))
+                logger.info("   {} gets the left bundle".format(family.name))
                 other_families = list(families)
                 del other_families[family_index]
                 bundles = allocate(other_families, right_sequence)
@@ -81,6 +84,5 @@ def allocate(families:list, goods:list)->list:
 
 if __name__ == "__main__":
     import doctest
-    # trace = print
     (failures,tests) = doctest.testmod(report=True)
     print ("{} failures, {} tests".format(failures,tests))

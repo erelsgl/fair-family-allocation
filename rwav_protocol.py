@@ -8,12 +8,13 @@ See: https://arxiv.org/abs/1709.02564 subsections 3.2 and 5.4 for details.
 
 from functools import lru_cache
 from collections import defaultdict
-import fairness_criteria
-from agents import *
 from families import *
 from utils import plural
 
-trace = lambda *x: None  # To enable tracing, set trace=print
+import logging, sys
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.StreamHandler(sys.stdout))
+# To enable tracing, logger.setLevel(logging.INFO)
 
 
 def allocate(families:list, goods: set)->list:
@@ -45,9 +46,9 @@ def allocate(families:list, goods: set)->list:
     while len(remaining_goods) > 0:
         current_family = families[family_index]
         current_family_bundle = bundles[family_index]
-        trace("\nTurn #{}: {}'s turn to pick a good from {}:".format(turn_index + 1, current_family.name, sorted(remaining_goods)))
+        logger.info("\nTurn #{}: {}'s turn to pick a good from {}:".format(turn_index + 1, current_family.name, sorted(remaining_goods)))
         g = choose_good(current_family, current_family_bundle, remaining_goods, num_of_families)
-        trace("{} picks {}".format(current_family.name, g))
+        logger.info("{} picks {}".format(current_family.name, g))
         current_family_bundle.add(g)
         remaining_goods.remove(g)
         turn_index += 1
@@ -57,7 +58,7 @@ def allocate(families:list, goods: set)->list:
 
 
 
-# templates for printing a trace:
+# templates for printing to logger:
 AGENT_WEIGHT_FORMAT = "{0: <12}{1: <12}{2: <3}{3: <3}{4: <9}"
 GOODS_WEIGHT_FORMAT = "{0: <6}{1: <9}"
 
@@ -77,19 +78,19 @@ def choose_good(family:Family, owned_goods:set, remaining_goods:set, num_of_fami
     'z'
     """
     map_good_to_total_weight = defaultdict(int)
-    choose_good.trace("Member weights:")
-    choose_good.trace(AGENT_WEIGHT_FORMAT.format("","Desired set","r","s","weight"))
+    choose_good.logger.info("Member weights:")
+    choose_good.logger.info(AGENT_WEIGHT_FORMAT.format("","Desired set","r","s","weight"))
     for member in family.members:
         current_member_weight           = member_weight(member, member.target_value, owned_goods, remaining_goods, num_of_families)
         for good in member.desired_goods:
             map_good_to_total_weight[good] += current_member_weight * member.cardinality
 
-    choose_good.trace("Remaining good weights:")
-    choose_good.trace(GOODS_WEIGHT_FORMAT.format("","Weight"))
+    choose_good.logger.info("Remaining good weights:")
+    choose_good.logger.info(GOODS_WEIGHT_FORMAT.format("","Weight"))
     for good in remaining_goods:
-        choose_good.trace(GOODS_WEIGHT_FORMAT.format(good, map_good_to_total_weight[good]))
+        choose_good.logger.info(GOODS_WEIGHT_FORMAT.format(good, map_good_to_total_weight[good]))
     return min(remaining_goods, key=lambda good: (-map_good_to_total_weight[good], good))
-choose_good.trace = lambda *x: None  # To enable tracing, set choose_good.trace=print
+choose_good.logger=logging.getLogger("choose_good")
 
 
 def member_weight(member: BinaryAgent, target_value: int, owned_goods: set, remaining_goods: set, num_of_families:int=2) -> float:
@@ -109,11 +110,11 @@ def member_weight(member: BinaryAgent, target_value: int, owned_goods: set, rema
     the_member_weight = weight(member_remaining_value, member_should_get_value, num_of_families)
     members_string = "{} member{}".format(member.cardinality, plural(member.cardinality))
     desired_goods_string = ",".join(sorted(member.desired_goods))
-    member_weight.trace(AGENT_WEIGHT_FORMAT.format(
+    member_weight.logger.info(AGENT_WEIGHT_FORMAT.format(
         members_string, desired_goods_string,
         member_remaining_value, member_should_get_value, the_member_weight))
     return the_member_weight
-member_weight.trace = lambda *x: None  # To enable tracing, set member_weight.trace=print
+member_weight.logger = logging.getLogger("member_weight")
 
 
 

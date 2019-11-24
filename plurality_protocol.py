@@ -12,11 +12,12 @@ it includes only the construction of the final allocation from that subsimplex.
 from agents import *
 from families import Family
 import fairness_criteria
-import itertools
-    
 
 
-trace = lambda *x: None  # To enable tracing, set trace=print
+import logging, sys
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.StreamHandler(sys.stdout))
+# To enable tracing, logger.setLevel(logging.INFO)
 
 
 def best_index_by_plurality(family:Family, partition:list) -> int:
@@ -36,7 +37,7 @@ def best_index_by_plurality(family:Family, partition:list) -> int:
         best = member.best_index(partition)
         votes[best] += member.cardinality
     winner = max(range(len(partition)), key=lambda i: votes[i])
-    trace("{}: votes={}, winner=allocation[{}]={}".format(family.name, votes, winner, partition[winner]))
+    logger.info("{}: votes={}, winner=allocation[{}]={}".format(family.name, votes, winner, partition[winner]))
     return winner
 
 
@@ -67,7 +68,7 @@ def find_plurality_envy_free_allocation(families: list, partition:list) -> bool:
         family = families[i]
         i_best = best_index_by_plurality(family, partition)
         if i_best in best_indices:
-            trace("Two families vote for {} - no permutation is plurality-EF")
+            logger.info("Two families vote for {} - no permutation is plurality-EF")
             return None
         best_indices.add(i_best)
         allocation[i] = partition[i_best]
@@ -102,7 +103,7 @@ def find_plurality_EF2_allocation(families: list, subsimplex_vertices: list) -> 
         partition = subsimplex_vertices[i]
         i_best = best_index_by_plurality(family, partition)
         if i_best in best_indices:
-            trace("Two families vote for {} - no permutation is plurality-EF")
+            logger.info("Two families vote for {} - no permutation is plurality-EF")
             return None
         best_indices.add(i_best)
         map_family_index_to_best_index[i] = i_best
@@ -123,6 +124,5 @@ def find_plurality_EF2_allocation(families: list, subsimplex_vertices: list) -> 
 
 if __name__ == "__main__":
     import doctest
-    # trace = print
     (failures,tests) = doctest.testmod(report=True)
     print ("{} failures, {} tests".format(failures,tests))

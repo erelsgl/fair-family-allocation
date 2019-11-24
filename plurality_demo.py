@@ -7,10 +7,9 @@ See: https://arxiv.org/abs/1709.02564 Theorem 5.5 for details.
 """
 
 from agents import *
-import families
 from families import Family
 import fairness_criteria
-import plurality_protocol
+import plurality_protocol, logging
 
 def make_family_12_goods(valuation_lists:list, name:str):
     """
@@ -46,7 +45,7 @@ def make_family_12_goods(valuation_lists:list, name:str):
 
 
 if __name__ == "__main__":
-    plurality_protocol.trace = print
+    plurality_protocol.logger.setLevel(logging.INFO)
 
     families = [
         make_family_12_goods([

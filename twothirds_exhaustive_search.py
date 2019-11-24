@@ -11,10 +11,14 @@ from agents import BinaryAgent
 from families import Family
 import copy, itertools, utils
 from partitions import powerset, partitions_to_exactly_c
+import twothirds_protocol
 
 fairness_1_of_best_2 = fairness_criteria.OneOfBestC(2)
 
-trace = lambda *x: None  # To enable tracing, set trace=print
+import logging, sys
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.StreamHandler(sys.stdout))
+# To enable tracing, logger.setLevel(logging.INFO)
 
 
 def demo(family:Family, goods:set):
@@ -82,7 +86,7 @@ def check_conjecture_for(goods:str):
                     print(family2)
                     return
                 else:
-                    trace("Conjecture is true for family {} vs family {}".format(family1.name, family2.name))
+                    logger.info("Conjecture is true for family {} vs family {}".format(family1.name, family2.name))
     print("The 2/3 conjecture is true for {} goods".format(len(goods)))
 
 
@@ -90,7 +94,7 @@ if __name__ == "__main__":
     import doctest
     (failures,tests) = doctest.testmod(report=True)
     print ("{} failures, {} tests".format(failures,tests))
-    trace = print   # comment-out this line for a silent run; uncomment for trace
+    logger.setLevel(logging.INFO)     # comment-out this line for a silent run; uncomment for tracing
     # check_conjecture_for("xyz")
     # check_conjecture_for("wxyz")
     # check_conjecture_for("vwxyz")

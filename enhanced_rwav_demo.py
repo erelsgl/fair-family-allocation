@@ -12,8 +12,9 @@ from families import Family
 from utils import demo
 
 if __name__ == "__main__":
-    enhanced_rwav_protocol.trace = print
-    rwav_protocol.trace = print
+    import logging
+    enhanced_rwav_protocol.logger.setLevel(logging.INFO)
+    rwav_protocol.logger.setLevel(logging.INFO)
 
     # Define fairness criteria:
     fairness_1_of_best_2 = fairness_criteria.OneOfBestC(2)
@@ -32,7 +33,6 @@ if __name__ == "__main__":
 
 
     # Run the protocol:
-    rwav_protocol.allocate.trace = print
     print("\n\nRWAV protocol - group 1 plays first:")
     demo(rwav_protocol.allocate, [family1, family2], "vwxyz")
 
