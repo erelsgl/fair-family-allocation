@@ -44,49 +44,48 @@ def make_family_12_goods(valuation_lists:list, name:str):
     return Family(members, EF2, name=name)
 
 
-if __name__ == "__main__":
-    plurality_protocol.logger.setLevel(logging.INFO)
+plurality_protocol.logger.setLevel(logging.INFO)
 
-    families = [
-        make_family_12_goods([
-            [1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1],
-            [2, 2, 2, 3, 3, 3, 2, 2, 2, 2, 2, 2],
-            [2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2],
-            [1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1],
-        ], "Group 1"),
-        make_family_12_goods([
-            [1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1],
-            [2, 2, 2, 2, 2, 2, 3, 3, 3, 2, 2, 2],
-            [2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2],
-            [1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1],
-        ], "Group 2"),
-        make_family_12_goods([
-            [1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2],
-            [2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 3],
-            [1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1],
-        ], "Group 3"),
-        make_family_12_goods([
-            [1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1],
-            [2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 3],
-            [1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1],
-        ], "Group 4"),
-    ]
+families = [
+    make_family_12_goods([
+        [1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1],
+        [2, 2, 2, 3, 3, 3, 2, 2, 2, 2, 2, 2],
+        [2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2],
+        [1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1],
+    ], "Group 1"),
+    make_family_12_goods([
+        [1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1],
+        [2, 2, 2, 2, 2, 2, 3, 3, 3, 2, 2, 2],
+        [2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2],
+        [1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1],
+    ], "Group 2"),
+    make_family_12_goods([
+        [1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2],
+        [2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 3],
+        [1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1],
+    ], "Group 3"),
+    make_family_12_goods([
+        [1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1],
+        [2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 3],
+        [1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1],
+    ], "Group 4"),
+]
 
-    subsimplex_vertices    = [
-        ["abc","def","ghi","kl"],
-        ["abc","ef","ghi","kl"],
-        ["abc","ef","hi","kl"],
-        ["abc","ef","hij","kl"]]
+subsimplex_vertices    = [
+    ["abc","def","ghi","kl"],
+    ["abc","ef","ghi","kl"],
+    ["abc","ef","hi","kl"],
+    ["abc","ef","hij","kl"]]
 
-    print("Subsimplex vertices:",subsimplex_vertices)
-    allocation = plurality_protocol.find_plurality_EF2_allocation(families, subsimplex_vertices)
+print("Subsimplex vertices:",subsimplex_vertices)
+allocation = plurality_protocol.find_plurality_EF2_allocation(families, subsimplex_vertices)
 
-    print("\nFinal allocation:")
-    for index in range(len(families)):
-        print (" * ", families[index].allocation_description(allocation[index], allocation))
+print("\nFinal allocation:")
+for index in range(len(families)):
+    print (" * ", families[index].allocation_description(allocation[index], allocation))
